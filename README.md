@@ -11,7 +11,7 @@ MapLab es una pagina estatica para convertir Markdown en mapas visuales editable
 - Inspector para texto, color, borde, forma, fuente, conexiones y paletas por profundidad.
 - Persistencia local con `localStorage`, historial undo/redo y gestion basica de proyectos.
 - Guardado manual como archivo `.maplab.json` descargado al PC, ideal para GitHub Pages sin base de datos.
-- Exportacion a PNG, SVG, Markdown, JSON y PDF descargable, sin usar impresora ni dialogo de impresion.
+- Exportacion del mapa completo a PNG, PNG 2x, PNG 4x, SVG vectorial, Markdown, JSON y PDF vectorial descargable, sin usar impresora ni dialogo de impresion.
 
 ## Publicar en GitHub Pages
 

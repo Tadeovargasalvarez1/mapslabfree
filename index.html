@@ -1281,12 +1281,13 @@
       </div>
       <div class="modal-body">
         <div class="export-grid">
-          <button class="export-option" data-export="png"><i data-lucide="image-down"></i><span>PNG</span></button>
+          <button class="export-option" data-export="png"><i data-lucide="image-down"></i><span>PNG completo</span></button>
           <button class="export-option" data-export="png2"><i data-lucide="images"></i><span>PNG 2x</span></button>
-          <button class="export-option" data-export="svg"><i data-lucide="file-code-2"></i><span>SVG</span></button>
+          <button class="export-option" data-export="png4"><i data-lucide="image-plus"></i><span>PNG 4x</span></button>
+          <button class="export-option" data-export="svg"><i data-lucide="file-code-2"></i><span>SVG vector</span></button>
           <button class="export-option" data-export="markdown"><i data-lucide="file-text"></i><span>Markdown</span></button>
           <button class="export-option" data-export="json"><i data-lucide="braces"></i><span>JSON</span></button>
-          <button class="export-option" data-export="pdf"><i data-lucide="file-down"></i><span>PDF</span></button>
+          <button class="export-option" data-export="pdf"><i data-lucide="file-down"></i><span>PDF vector</span></button>
         </div>
       </div>
       <div class="modal-foot">
@@ -2742,8 +2743,8 @@ Deep Learning -> usa -> Redes neuronales`;
         });
         group.style.cursor = state.connectingSource ? "crosshair" : "grab";
 
-        const selected = state.selectedIds.includes(node.id);
-        const searchHit = isSearchHit(node);
+        const selected = !state.isExporting && state.selectedIds.includes(node.id);
+        const searchHit = !state.isExporting && isSearchHit(node);
         group.appendChild(renderShape(node, visual, box, selected, searchHit));
 
         if (node.collapsed) {
@@ -2854,7 +2855,9 @@ Deep Learning -> usa -> Redes neuronales`;
           shape = svgEl("rect", { ...common, x: 0, y: 0, width: box.width, height: box.height, rx: radius, ry: radius });
         }
         shape.removeAttribute("filter");
-        shape.style.filter = `drop-shadow(${shadowToDropShadow(getTheme().shadow)})`;
+        if (!state.isExporting) {
+          shape.style.filter = `drop-shadow(${shadowToDropShadow(getTheme().shadow)})`;
+        }
         if (node.style && node.style.shape === "card") {
           shape.setAttribute("rx", 7);
           const strip = svgEl("rect", {
@@ -2882,7 +2885,7 @@ Deep Learning -> usa -> Redes neuronales`;
         const targetBox = nodeBox(target);
         const visual = edgeVisual(edge);
         const pathData = edgePath(source, target, sourceBox, targetBox, visual.line);
-        const selected = state.selectedEdgeId === edge.id;
+        const selected = !state.isExporting && state.selectedEdgeId === edge.id;
         const group = svgEl("g", { "data-edge-id": edge.id });
         const hit = svgEl("path", {
           d: pathData,
@@ -3651,22 +3654,18 @@ Deep Learning -> usa -> Redes neuronales`;
       }
 
       async function exportPdf() {
-        const { canvas } = await svgToCanvas(2);
-        const jpeg = await canvasToBlob(canvas, "image/jpeg", 0.92);
-        if (!jpeg) throw new Error("No se pudo crear el PDF");
-        const jpegBytes = new Uint8Array(await jpeg.arrayBuffer());
-        const pdfBytes = createPdfFromJpeg(jpegBytes, canvas.width, canvas.height);
+        const pdfBytes = createVectorPdf();
         const pdf = new Blob([pdfBytes], { type: "application/pdf" });
         downloadBlob(`${safeFilename(state.name)}.pdf`, pdf, "application/pdf");
       }
 
       function svgToCanvas(scale = 1) {
-        const svgText = serializedSvg();
+        const { text: svgText, bounds } = exportSvgDocument();
         const blob = new Blob([svgText], { type: "image/svg+xml;charset=utf-8" });
         const url = URL.createObjectURL(blob);
         const image = new Image();
-        const width = dom.svg.clientWidth || 1200;
-        const height = dom.svg.clientHeight || 800;
+        const width = Math.max(1, Math.ceil(bounds.width));
+        const height = Math.max(1, Math.ceil(bounds.height));
         return new Promise((resolve, reject) => {
           image.onload = () => {
             const canvas = document.createElement("canvas");
@@ -3692,14 +3691,155 @@ Deep Learning -> usa -> Redes neuronales`;
         return new Promise((resolve) => canvas.toBlob(resolve, type, quality));
       }
 
-      function createPdfFromJpeg(jpegBytes, pixelWidth, pixelHeight) {
+      function createVectorPdf() {
+        const bounds = exportBounds(120);
+        const nodes = exportNodes();
+        const nodeIds = new Set(nodes.map((node) => node.id));
+        const edges = state.edges.filter((edge) => nodeIds.has(edge.source) && nodeIds.has(edge.target));
+        const scale = 0.75;
+        const pageWidth = Math.max(1, pdfNum(bounds.width * scale));
+        const pageHeight = Math.max(1, pdfNum(bounds.height * scale));
+        const commands = [];
+
+        commands.push(pdfFill(getTheme().background));
+        commands.push(pdfRectPath(bounds.minX, bounds.minY, bounds.width, bounds.height, bounds, scale, pageHeight));
+        commands.push("f");
+
+        edges.forEach((edge) => drawPdfEdge(commands, edge, bounds, scale, pageHeight));
+        nodes.forEach((node) => drawPdfNode(commands, node, bounds, scale, pageHeight));
+
+        return createPdfBytes(commands.join("\n"), pageWidth, pageHeight);
+      }
+
+      function drawPdfEdge(commands, edge, bounds, scale, pageHeight) {
+        const source = getNode(edge.source);
+        const target = getNode(edge.target);
+        if (!source || !target) return;
+        const sourceBox = nodeBox(source);
+        const targetBox = nodeBox(target);
+        const visual = edgeVisual(edge);
+        const pathData = edgePath(source, target, sourceBox, targetBox, visual.line);
+        const p1 = boundaryPoint(source, target, sourceBox);
+        const p2 = boundaryPoint(target, source, targetBox);
+
+        commands.push("q");
+        commands.push(pdfStroke(visual.color));
+        commands.push(`${pdfNum(Math.max(1, visual.width * scale))} w`);
+        commands.push("1 J 1 j");
+        if (visual.dash === "dashed") commands.push("[8 6] 0 d");
+        if (visual.dash === "dotted") commands.push("[1.5 6] 0 d");
+        commands.push(pdfPathFromSvgPath(pathData, bounds, scale, pageHeight));
+        commands.push("S");
+        commands.push("Q");
+
+        if (edge.directed !== false) {
+          const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+          const length = 12 + visual.width * 1.8;
+          const width = 7 + visual.width;
+          const base = {
+            x: p2.x - Math.cos(angle) * length,
+            y: p2.y - Math.sin(angle) * length
+          };
+          const perp = { x: Math.cos(angle + Math.PI / 2), y: Math.sin(angle + Math.PI / 2) };
+          const points = [
+            [p2.x, p2.y],
+            [base.x + perp.x * width, base.y + perp.y * width],
+            [base.x - perp.x * width, base.y - perp.y * width]
+          ];
+          commands.push(pdfFill(visual.color));
+          commands.push(pdfPolygonPath(points, bounds, scale, pageHeight));
+          commands.push("f");
+        }
+
+        if (edge.label) {
+          const midpoint = { x: (source.x + target.x) / 2, y: (source.y + target.y) / 2 };
+          const label = String(edge.label).slice(0, 44);
+          const labelWidth = Math.max(44, label.length * 7 + 18);
+          const labelHeight = 26;
+          commands.push(pdfFill(getTheme().background));
+          commands.push(pdfStroke(colorWithAlpha(visual.color, 0.45)));
+          commands.push("1 w");
+          commands.push(pdfRoundedRectPath(midpoint.x - labelWidth / 2, midpoint.y - labelHeight / 2, labelWidth, labelHeight, 13, bounds, scale, pageHeight));
+          commands.push("B");
+          drawPdfText(commands, [label], midpoint.x, midpoint.y + 4, 12, true, "center", getTheme().textColor, bounds, scale, pageHeight);
+        }
+      }
+
+      function drawPdfNode(commands, node, bounds, scale, pageHeight) {
+        const visual = nodeVisual(node);
+        const box = nodeBox(node);
+        const x = node.x - box.width / 2;
+        const y = node.y - box.height / 2;
+        const shape = node.style && node.style.shape ? node.style.shape : "rounded";
+
+        commands.push("q");
+        commands.push(pdfFill(visual.fill));
+        commands.push(pdfStroke(visual.border));
+        commands.push(`${pdfNum(Math.max(0.6, visual.borderWidth * scale))} w`);
+
+        if (shape === "circle" || shape === "oval") {
+          commands.push(pdfEllipsePath(node.x, node.y, box.width / 2, box.height / 2, bounds, scale, pageHeight));
+        } else if (shape === "diamond") {
+          commands.push(pdfPolygonPath([
+            [node.x, y],
+            [x + box.width, node.y],
+            [node.x, y + box.height],
+            [x, node.y]
+          ], bounds, scale, pageHeight));
+        } else if (shape === "hex") {
+          commands.push(pdfPolygonPath([
+            [x + box.width * 0.14, y],
+            [x + box.width * 0.86, y],
+            [x + box.width, node.y],
+            [x + box.width * 0.86, y + box.height],
+            [x + box.width * 0.14, y + box.height],
+            [x, node.y]
+          ], bounds, scale, pageHeight));
+        } else {
+          const radius = shape === "rect" ? 2 : shape === "pill" ? box.height / 2 : visual.radius;
+          commands.push(pdfRoundedRectPath(x, y, box.width, box.height, radius, bounds, scale, pageHeight));
+        }
+        commands.push("B");
+
+        if (shape === "card") {
+          commands.push(pdfFill(getTheme().accentColor));
+          commands.push(pdfRoundedRectPath(x, y, 7, box.height, 4, bounds, scale, pageHeight));
+          commands.push("f");
+        }
+        commands.push("Q");
+
+        const anchorX = x + textAnchorX(box, visual);
+        const firstLineY = y + box.height / 2 - ((box.lines.length - 1) * box.lineHeight) / 2 + box.lineHeight * 0.32;
+        box.lines.forEach((line, index) => {
+          drawPdfText(commands, [line], anchorX, firstLineY + index * box.lineHeight, visual.fontSize, visual.bold, visual.align, visual.color, bounds, scale, pageHeight);
+        });
+      }
+
+      function drawPdfText(commands, lines, anchorX, baselineY, fontSize, bold, align, color, bounds, scale, pageHeight) {
+        const font = bold ? "/F2" : "/F1";
+        const size = pdfNum(fontSize * scale);
+        commands.push("BT");
+        commands.push(pdfFill(color));
+        commands.push(`${font} ${size} Tf`);
+        lines.forEach((line, index) => {
+          const clean = pdfSafeText(line);
+          const textWidth = approximatePdfTextWidth(clean, fontSize * scale, bold);
+          let x = anchorX;
+          if (align === "center") x -= textWidth / scale / 2;
+          if (align === "right") x -= textWidth / scale;
+          const point = pdfPoint(x, baselineY + index * fontSize * 1.35, bounds, scale, pageHeight);
+          commands.push(`1 0 0 1 ${point.x} ${point.y} Tm`);
+          commands.push(`(${pdfEscape(clean)}) Tj`);
+        });
+        commands.push("ET");
+      }
+
+      function createPdfBytes(content, pageWidth, pageHeight) {
         const encoder = new TextEncoder();
         const chunks = [];
         const offsets = [0];
         let position = 0;
-        const pageWidth = Math.round(pixelWidth * 0.75 * 100) / 100;
-        const pageHeight = Math.round(pixelHeight * 0.75 * 100) / 100;
-        const content = `q\n${pageWidth} 0 0 ${pageHeight} 0 0 cm\n/Im0 Do\nQ`;
+        const contentBytes = encoder.encode(content);
 
         const write = (value) => {
           const bytes = typeof value === "string" ? encoder.encode(value) : value;
@@ -3714,21 +3854,22 @@ Deep Learning -> usa -> Redes neuronales`;
         write("%PDF-1.4\n%MapLab\n");
         object(1, "<< /Type /Catalog /Pages 2 0 R >>");
         object(2, "<< /Type /Pages /Kids [3 0 R] /Count 1 >>");
-        object(3, `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>`);
+        object(3, `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /Contents 4 0 R >>`);
 
         offsets[4] = position;
-        write(`4 0 obj\n<< /Type /XObject /Subtype /Image /Width ${pixelWidth} /Height ${pixelHeight} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpegBytes.length} >>\nstream\n`);
-        write(jpegBytes);
+        write(`4 0 obj\n<< /Length ${contentBytes.length} >>\nstream\n`);
+        write(contentBytes);
         write("\nendstream\nendobj\n");
 
-        object(5, `<< /Length ${encoder.encode(content).length} >>\nstream\n${content}\nendstream`);
+        object(5, "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>");
+        object(6, "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>");
 
         const xrefStart = position;
-        write("xref\n0 6\n0000000000 65535 f \n");
-        for (let i = 1; i <= 5; i += 1) {
+        write("xref\n0 7\n0000000000 65535 f \n");
+        for (let i = 1; i <= 6; i += 1) {
           write(`${String(offsets[i]).padStart(10, "0")} 00000 n \n`);
         }
-        write(`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`);
+        write(`trailer\n<< /Size 7 /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`);
 
         const total = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
         const output = new Uint8Array(total);
@@ -3741,12 +3882,257 @@ Deep Learning -> usa -> Redes neuronales`;
       }
 
       function serializedSvg() {
-        const cloneSvg = dom.svg.cloneNode(true);
-        cloneSvg.setAttribute("xmlns", SVG_NS);
-        cloneSvg.setAttribute("width", dom.svg.clientWidth || 1200);
-        cloneSvg.setAttribute("height", dom.svg.clientHeight || 800);
+        return exportSvgDocument().text;
+      }
+
+      function exportSvgDocument() {
+        const { svg, bounds } = buildExportSvg();
         const serializer = new XMLSerializer();
-        return `<?xml version="1.0" encoding="UTF-8"?>\n${serializer.serializeToString(cloneSvg)}`;
+        return {
+          bounds,
+          text: `<?xml version="1.0" encoding="UTF-8"?>\n${serializer.serializeToString(svg)}`
+        };
+      }
+
+      function buildExportSvg() {
+        return withExportVisuals(() => {
+          const bounds = exportBounds(120);
+          const nodes = exportNodes();
+          const nodeIds = new Set(nodes.map((node) => node.id));
+          const svg = svgEl("svg", {
+            xmlns: SVG_NS,
+            width: Math.ceil(bounds.width),
+            height: Math.ceil(bounds.height),
+            viewBox: `0 0 ${bounds.width} ${bounds.height}`
+          });
+          const defs = svgEl("defs");
+          defs.appendChild(marker("arrow", getTheme().edgeColor));
+          defs.appendChild(marker("arrow-accent", getTheme().accentColor));
+          svg.appendChild(defs);
+          svg.appendChild(svgEl("rect", {
+            x: 0,
+            y: 0,
+            width: bounds.width,
+            height: bounds.height,
+            fill: getTheme().background
+          }));
+
+          const world = svgEl("g", { transform: `translate(${-bounds.minX} ${-bounds.minY})` });
+          const edgeLayer = svgEl("g", { "data-layer": "edges" });
+          const nodeLayer = svgEl("g", { "data-layer": "nodes" });
+          state.edges
+            .filter((edge) => nodeIds.has(edge.source) && nodeIds.has(edge.target))
+            .forEach((edge) => edgeLayer.appendChild(renderEdge(edge)));
+          nodes.forEach((node) => nodeLayer.appendChild(renderNode(node)));
+          world.appendChild(edgeLayer);
+          world.appendChild(nodeLayer);
+          svg.appendChild(world);
+          return { svg, bounds };
+        });
+      }
+
+      function withExportVisuals(fn) {
+        const selectedIds = state.selectedIds;
+        const selectedEdgeId = state.selectedEdgeId;
+        const searchQuery = state.searchQuery;
+        const isExporting = state.isExporting;
+        state.selectedIds = [];
+        state.selectedEdgeId = null;
+        state.searchQuery = "";
+        state.isExporting = true;
+        try {
+          return fn();
+        } finally {
+          state.selectedIds = selectedIds;
+          state.selectedEdgeId = selectedEdgeId;
+          state.searchQuery = searchQuery;
+          state.isExporting = isExporting;
+        }
+      }
+
+      function exportNodes() {
+        return state.nodes.filter((node) => isFiniteNumber(node.x) && isFiniteNumber(node.y));
+      }
+
+      function exportBounds(padding = 120) {
+        const nodes = exportNodes();
+        if (!nodes.length) {
+          return { minX: 0, minY: 0, maxX: 1200, maxY: 800, width: 1200, height: 800 };
+        }
+
+        let minX = Infinity;
+        let minY = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
+        nodes.forEach((node) => {
+          const box = nodeBox(node);
+          minX = Math.min(minX, node.x - box.width / 2);
+          minY = Math.min(minY, node.y - box.height / 2);
+          maxX = Math.max(maxX, node.x + box.width / 2);
+          maxY = Math.max(maxY, node.y + box.height / 2);
+        });
+
+        const nodeIds = new Set(nodes.map((node) => node.id));
+        state.edges
+          .filter((edge) => nodeIds.has(edge.source) && nodeIds.has(edge.target))
+          .forEach((edge) => {
+            const source = getNode(edge.source);
+            const target = getNode(edge.target);
+            if (!source || !target) return;
+            const labelWidth = edge.label ? Math.max(44, String(edge.label).length * 7 + 18) : 0;
+            const midX = (source.x + target.x) / 2;
+            const midY = (source.y + target.y) / 2;
+            minX = Math.min(minX, source.x, target.x, midX - labelWidth / 2);
+            minY = Math.min(minY, source.y, target.y, midY - 18);
+            maxX = Math.max(maxX, source.x, target.x, midX + labelWidth / 2);
+            maxY = Math.max(maxY, source.y, target.y, midY + 18);
+          });
+
+        minX = Math.floor(minX - padding);
+        minY = Math.floor(minY - padding);
+        maxX = Math.ceil(maxX + padding);
+        maxY = Math.ceil(maxY + padding);
+        return {
+          minX,
+          minY,
+          maxX,
+          maxY,
+          width: Math.max(1, maxX - minX),
+          height: Math.max(1, maxY - minY)
+        };
+      }
+
+      function pdfPoint(x, y, bounds, scale, pageHeight) {
+        return {
+          x: pdfNum((x - bounds.minX) * scale),
+          y: pdfNum(pageHeight - (y - bounds.minY) * scale)
+        };
+      }
+
+      function pdfRectPath(x, y, width, height, bounds, scale, pageHeight) {
+        const point = pdfPoint(x, y + height, bounds, scale, pageHeight);
+        return `${point.x} ${point.y} ${pdfNum(width * scale)} ${pdfNum(height * scale)} re`;
+      }
+
+      function pdfRoundedRectPath(x, y, width, height, radius, bounds, scale, pageHeight) {
+        const r = Math.min(radius, width / 2, height / 2);
+        const k = 0.5522847498;
+        const p = (px, py) => pdfPoint(px, py, bounds, scale, pageHeight);
+        const a = p(x + r, y);
+        const b = p(x + width - r, y);
+        const c1 = p(x + width - r + k * r, y);
+        const c2 = p(x + width, y + r - k * r);
+        const c = p(x + width, y + r);
+        const d = p(x + width, y + height - r);
+        const d1 = p(x + width, y + height - r + k * r);
+        const d2 = p(x + width - r + k * r, y + height);
+        const e = p(x + width - r, y + height);
+        const f = p(x + r, y + height);
+        const f1 = p(x + r - k * r, y + height);
+        const f2 = p(x, y + height - r + k * r);
+        const g = p(x, y + height - r);
+        const h = p(x, y + r);
+        const h1 = p(x, y + r - k * r);
+        const h2 = p(x + r - k * r, y);
+        return [
+          `${a.x} ${a.y} m`,
+          `${b.x} ${b.y} l`,
+          `${c1.x} ${c1.y} ${c2.x} ${c2.y} ${c.x} ${c.y} c`,
+          `${d.x} ${d.y} l`,
+          `${d1.x} ${d1.y} ${d2.x} ${d2.y} ${e.x} ${e.y} c`,
+          `${f.x} ${f.y} l`,
+          `${f1.x} ${f1.y} ${f2.x} ${f2.y} ${g.x} ${g.y} c`,
+          `${h.x} ${h.y} l`,
+          `${h1.x} ${h1.y} ${h2.x} ${h2.y} ${a.x} ${a.y} c`,
+          "h"
+        ].join("\n");
+      }
+
+      function pdfEllipsePath(cx, cy, rx, ry, bounds, scale, pageHeight) {
+        const k = 0.5522847498;
+        const p = (x, y) => pdfPoint(x, y, bounds, scale, pageHeight);
+        const top = p(cx, cy - ry);
+        const right = p(cx + rx, cy);
+        const bottom = p(cx, cy + ry);
+        const left = p(cx - rx, cy);
+        const c1 = p(cx + k * rx, cy - ry);
+        const c2 = p(cx + rx, cy - k * ry);
+        const c3 = p(cx + rx, cy + k * ry);
+        const c4 = p(cx + k * rx, cy + ry);
+        const c5 = p(cx - k * rx, cy + ry);
+        const c6 = p(cx - rx, cy + k * ry);
+        const c7 = p(cx - rx, cy - k * ry);
+        const c8 = p(cx - k * rx, cy - ry);
+        return [
+          `${top.x} ${top.y} m`,
+          `${c1.x} ${c1.y} ${c2.x} ${c2.y} ${right.x} ${right.y} c`,
+          `${c3.x} ${c3.y} ${c4.x} ${c4.y} ${bottom.x} ${bottom.y} c`,
+          `${c5.x} ${c5.y} ${c6.x} ${c6.y} ${left.x} ${left.y} c`,
+          `${c7.x} ${c7.y} ${c8.x} ${c8.y} ${top.x} ${top.y} c`,
+          "h"
+        ].join("\n");
+      }
+
+      function pdfPolygonPath(points, bounds, scale, pageHeight) {
+        if (!points.length) return "";
+        const first = pdfPoint(points[0][0], points[0][1], bounds, scale, pageHeight);
+        const lines = [`${first.x} ${first.y} m`];
+        points.slice(1).forEach(([x, y]) => {
+          const point = pdfPoint(x, y, bounds, scale, pageHeight);
+          lines.push(`${point.x} ${point.y} l`);
+        });
+        lines.push("h");
+        return lines.join("\n");
+      }
+
+      function pdfPathFromSvgPath(path, bounds, scale, pageHeight) {
+        const tokens = path.match(/[MLC]|-?\d+(?:\.\d+)?(?:e[-+]?\d+)?/gi) || [];
+        const out = [];
+        let index = 0;
+        while (index < tokens.length) {
+          const command = tokens[index++];
+          if (command === "M" || command === "L") {
+            const x = Number(tokens[index++]);
+            const y = Number(tokens[index++]);
+            const point = pdfPoint(x, y, bounds, scale, pageHeight);
+            out.push(`${point.x} ${point.y} ${command === "M" ? "m" : "l"}`);
+          } else if (command === "C") {
+            const p1 = pdfPoint(Number(tokens[index++]), Number(tokens[index++]), bounds, scale, pageHeight);
+            const p2 = pdfPoint(Number(tokens[index++]), Number(tokens[index++]), bounds, scale, pageHeight);
+            const p3 = pdfPoint(Number(tokens[index++]), Number(tokens[index++]), bounds, scale, pageHeight);
+            out.push(`${p1.x} ${p1.y} ${p2.x} ${p2.y} ${p3.x} ${p3.y} c`);
+          }
+        }
+        return out.join("\n");
+      }
+
+      function pdfFill(color) {
+        const rgb = hexToRgb(normalizeColorToHex(color));
+        return `${pdfNum(rgb.r / 255)} ${pdfNum(rgb.g / 255)} ${pdfNum(rgb.b / 255)} rg`;
+      }
+
+      function pdfStroke(color) {
+        const rgb = hexToRgb(normalizeColorToHex(color));
+        return `${pdfNum(rgb.r / 255)} ${pdfNum(rgb.g / 255)} ${pdfNum(rgb.b / 255)} RG`;
+      }
+
+      function pdfNum(value) {
+        return Math.round(Number(value) * 1000) / 1000;
+      }
+
+      function approximatePdfTextWidth(text, fontSize, bold) {
+        return String(text).length * fontSize * (bold ? 0.58 : 0.54);
+      }
+
+      function pdfSafeText(text) {
+        return String(text || "")
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^\x20-\x7E]/g, "?");
+      }
+
+      function pdfEscape(text) {
+        return String(text).replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
       }
 
       document.addEventListener("click", async (event) => {
@@ -3756,6 +4142,7 @@ Deep Learning -> usa -> Redes neuronales`;
         try {
           if (type === "png") await exportPng(1);
           if (type === "png2") await exportPng(2);
+          if (type === "png4") await exportPng(4);
           if (type === "svg") exportSvg();
           if (type === "markdown") exportMarkdown();
           if (type === "json") exportJson();
@@ -4138,6 +4525,7 @@ Deep Learning -> usa -> Redes neuronales`;
       function normalizeColorToHex(color) {
         if (!color) return "#000000";
         if (/^#[0-9a-f]{6}$/i.test(color)) return color;
+        if (/^#[0-9a-f]{8}$/i.test(color)) return color.slice(0, 7);
         if (/^#[0-9a-f]{3}$/i.test(color)) {
           return `#${color[1]}${color[1]}${color[2]}${color[2]}${color[3]}${color[3]}`;
         }
