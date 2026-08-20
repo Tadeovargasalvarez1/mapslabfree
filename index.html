@@ -1513,6 +1513,7 @@
       const STORAGE_KEY = "maplab.current.v1";
       const PROJECTS_KEY = "maplab.projects.v1";
       const SVG_NS = "http://www.w3.org/2000/svg";
+      const EMPTY_MARKDOWN = "";
 
       const DEFAULT_MARKDOWN = `# Inteligencia Artificial
 
@@ -1838,7 +1839,7 @@ Deep Learning -> usa -> Redes neuronales`;
       const state = {
         id: "default",
         name: "Mapa sin titulo",
-        markdown: DEFAULT_MARKDOWN,
+        markdown: EMPTY_MARKDOWN,
         nodes: [],
         edges: [],
         selectedIds: [],
@@ -1884,7 +1885,6 @@ Deep Learning -> usa -> Redes neuronales`;
       function init() {
         cacheDom();
         populateStaticControls();
-        loadPersistedState();
         applyUiMode();
         dom.editor.value = state.markdown;
         updateLineNumbers();
@@ -3867,7 +3867,7 @@ Deep Learning -> usa -> Redes neuronales`;
         mutate(() => {
           state.id = `project-${Date.now()}`;
           state.name = name.trim() || "Nuevo mapa";
-          state.markdown = DEFAULT_MARKDOWN;
+          state.markdown = EMPTY_MARKDOWN;
           state.nodes = [];
           state.edges = [];
           state.selectedIds = [];
@@ -3900,7 +3900,7 @@ Deep Learning -> usa -> Redes neuronales`;
       function restoreDocument(doc) {
         state.id = doc.id || state.id;
         state.name = doc.name || state.name;
-        state.markdown = doc.markdown || DEFAULT_MARKDOWN;
+        state.markdown = doc.markdown ?? EMPTY_MARKDOWN;
         state.nodes = Array.isArray(doc.nodes) ? doc.nodes : [];
         state.edges = Array.isArray(doc.edges) ? doc.edges : [];
         state.mapType = doc.mapType || state.mapType;
@@ -3916,6 +3916,10 @@ Deep Learning -> usa -> Redes neuronales`;
       function persist(forceProject = false) {
         if (!state.settings.autosave && !forceProject) return;
         const doc = capture();
+        if (!forceProject && !doc.nodes.length && !String(doc.markdown || "").trim()) {
+          localStorage.removeItem(STORAGE_KEY);
+          return;
+        }
         localStorage.setItem(STORAGE_KEY, JSON.stringify(doc));
         const projects = getProjects();
         const existing = projects.findIndex((project) => project.id === doc.id);
