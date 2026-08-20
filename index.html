@@ -290,7 +290,7 @@
 
     .left-panel {
       display: grid;
-      grid-template-rows: auto auto 1fr auto;
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
       border-right: 1px solid var(--border);
     }
 
@@ -335,10 +335,94 @@
       border-bottom: 1px solid var(--border);
     }
 
+    .mode-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      background: color-mix(in srgb, var(--panel-bg) 86%, transparent);
+    }
+
+    .mode-tabs button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-width: 0;
+      min-height: 34px;
+      border: 1px solid transparent;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .mode-tabs button.active {
+      border-color: color-mix(in srgb, var(--accent) 44%, var(--border));
+      background: color-mix(in srgb, var(--accent) 12%, var(--panel-strong));
+      color: var(--text);
+    }
+
+    .mode-tabs svg {
+      width: 15px;
+    }
+
+    .left-content {
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .content-pane {
+      height: 100%;
+      min-height: 0;
+    }
+
+    .builder-scroll {
+      height: 100%;
+      min-height: 0;
+      overflow: auto;
+      padding: 12px;
+    }
+
+    .builder-section {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .builder-section:first-child {
+      padding-top: 0;
+    }
+
+    .builder-section:last-child {
+      border-bottom: 0;
+    }
+
+    .builder-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .builder-actions .wide,
+    .text-btn.wide,
+    .chip-btn.wide {
+      grid-column: 1 / -1;
+    }
+
+    .text-btn.full,
+    .chip-btn.full {
+      width: 100%;
+      justify-content: center;
+    }
+
     .editor-wrap {
       display: grid;
       grid-template-columns: 46px 1fr;
       min-height: 0;
+      height: calc(100% - 55px);
       background: color-mix(in srgb, var(--panel-strong) 76%, transparent);
     }
 
@@ -1003,7 +1087,8 @@
         grid-template-columns: 1fr;
       }
 
-      .field-row {
+      .field-row,
+      .builder-actions {
         grid-template-columns: 1fr;
       }
     }
@@ -1058,22 +1143,96 @@
     <main class="workbench">
       <aside class="panel left-panel" id="leftPanel">
         <div class="panel-header">
-          <div class="panel-title">Markdown</div>
+          <div class="panel-title" id="leftPanelTitle">Nodos</div>
           <div class="editor-actions">
-            <button class="icon-btn" data-action="format" title="Formatear" aria-label="Formatear"><i data-lucide="wand-2"></i></button>
-            <button class="icon-btn" data-action="download-md" title="Descargar Markdown" aria-label="Descargar Markdown"><i data-lucide="file-down"></i></button>
+            <button class="icon-btn" data-action="visual-focus-input" data-mode-only="visual" title="Agregar nodo" aria-label="Agregar nodo"><i data-lucide="circle-plus"></i></button>
+            <button class="icon-btn" data-action="format" data-mode-only="markdown" title="Formatear" aria-label="Formatear"><i data-lucide="wand-2"></i></button>
+            <button class="icon-btn" data-action="download-md" data-mode-only="markdown" title="Descargar Markdown" aria-label="Descargar Markdown"><i data-lucide="file-down"></i></button>
           </div>
         </div>
 
-        <div class="quickbar">
-          <select class="select compact" id="templateSelect" aria-label="Plantillas"></select>
-          <button class="chip-btn" data-action="apply-template" title="Insertar plantilla" aria-label="Insertar plantilla"><i data-lucide="sparkles"></i><span>Usar</span></button>
-          <button class="chip-btn" data-action="replace" title="Buscar y reemplazar" aria-label="Buscar y reemplazar"><i data-lucide="replace"></i><span>Reemplazar</span></button>
+        <div class="mode-tabs" id="contentModeTabs" role="tablist" aria-label="Modo de edicion">
+          <button class="active" data-content-mode="visual" type="button"><i data-lucide="mouse-pointer-click"></i><span>Nodos</span></button>
+          <button data-content-mode="markdown" type="button"><i data-lucide="file-text"></i><span>Markdown</span></button>
         </div>
 
-        <div class="editor-wrap">
-          <div class="line-numbers" id="lineNumbers" aria-hidden="true"></div>
-          <textarea class="markdown-editor" id="markdownEditor" spellcheck="false" aria-label="Editor Markdown"></textarea>
+        <div class="left-content">
+          <section class="content-pane" id="visualBuilderPane" aria-label="Constructor de nodos">
+            <div class="builder-scroll">
+              <div class="builder-section">
+                <div class="section-title"><i data-lucide="circle-plus"></i><span>Agregar nodo</span></div>
+                <div class="segmented" id="addModeSegment">
+                  <button class="active" data-add-mode="root" type="button">Raiz</button>
+                  <button data-add-mode="child" type="button">Hijo</button>
+                  <button data-add-mode="sibling" type="button">Hermano</button>
+                </div>
+                <div class="field" style="margin-top: 10px;">
+                  <label for="visualNodeText">Texto</label>
+                  <input id="visualNodeText" type="text" autocomplete="off" placeholder="Nueva idea" />
+                </div>
+                <div class="field" id="visualParentField">
+                  <label for="visualParentSelect">Referencia</label>
+                  <select id="visualParentSelect"></select>
+                </div>
+                <button class="text-btn active full" data-action="visual-add-node"><i data-lucide="plus"></i>Agregar</button>
+              </div>
+
+              <div class="builder-section">
+                <div class="section-title"><i data-lucide="list-plus"></i><span>Agregar varios</span></div>
+                <div class="field">
+                  <label for="visualBatchText">Lista</label>
+                  <textarea id="visualBatchText" placeholder="Idea uno&#10;Idea dos&#10;Idea tres"></textarea>
+                </div>
+                <div class="field">
+                  <label for="visualBatchParentSelect">Padre</label>
+                  <select id="visualBatchParentSelect"></select>
+                </div>
+                <button class="text-btn full" data-action="visual-add-batch"><i data-lucide="rows-3"></i>Crear lista</button>
+              </div>
+
+              <div class="builder-section">
+                <div class="section-title"><i data-lucide="git-merge"></i><span>Relacionar</span></div>
+                <div class="field-row">
+                  <div class="field">
+                    <label for="visualRelationSource">Origen</label>
+                    <select id="visualRelationSource"></select>
+                  </div>
+                  <div class="field">
+                    <label for="visualRelationTarget">Destino</label>
+                    <select id="visualRelationTarget"></select>
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="visualRelationLabel">Texto</label>
+                  <input id="visualRelationLabel" type="text" autocomplete="off" placeholder="relacion" />
+                </div>
+                <button class="text-btn full" data-action="visual-add-relation"><i data-lucide="git-branch-plus"></i>Conectar</button>
+              </div>
+
+              <div class="builder-section">
+                <div class="section-title"><i data-lucide="zap"></i><span>Seleccion</span></div>
+                <div class="builder-actions">
+                  <button class="chip-btn" data-action="add-child"><i data-lucide="corner-down-right"></i>Hijo</button>
+                  <button class="chip-btn" data-action="add-sibling"><i data-lucide="list-plus"></i>Hermano</button>
+                  <button class="chip-btn" data-action="duplicate"><i data-lucide="copy-plus"></i>Duplicar</button>
+                  <button class="chip-btn" data-action="organize"><i data-lucide="layout-template"></i>Ordenar</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="content-pane hidden" id="markdownPane" aria-label="Editor Markdown">
+            <div class="quickbar">
+              <select class="select compact" id="templateSelect" aria-label="Plantillas"></select>
+              <button class="chip-btn" data-action="apply-template" title="Insertar plantilla" aria-label="Insertar plantilla"><i data-lucide="sparkles"></i><span>Usar</span></button>
+              <button class="chip-btn" data-action="replace" title="Buscar y reemplazar" aria-label="Buscar y reemplazar"><i data-lucide="replace"></i><span>Reemplazar</span></button>
+            </div>
+
+            <div class="editor-wrap">
+              <div class="line-numbers" id="lineNumbers" aria-hidden="true"></div>
+              <textarea class="markdown-editor" id="markdownEditor" spellcheck="false" aria-label="Editor Markdown"></textarea>
+            </div>
+          </section>
         </div>
 
         <div class="editor-footer">
@@ -1106,8 +1265,9 @@
           <svg id="mapSvg" tabindex="0" role="application" aria-label="Mapa visual"></svg>
 
           <div class="empty-state" id="emptyState">
-            <h2>Pega Markdown para crear tu mapa</h2>
-            <p>Usa titulos, listas o relaciones con flechas para generar nodos conectados.</p>
+            <h2>Agrega nodos para crear tu mapa</h2>
+            <p>Construye ideas, ramas y conexiones desde el panel de Nodos.</p>
+            <button class="text-btn active" data-action="visual-focus-input"><i data-lucide="circle-plus"></i>Agregar nodo</button>
             <button class="text-btn active" data-action="load-example"><i data-lucide="sparkles"></i>Crear ejemplo</button>
             <button class="text-btn" data-action="import"><i data-lucide="folder-open"></i>Importar Markdown</button>
           </div>
@@ -1696,7 +1856,8 @@ Deep Learning -> usa -> Redes neuronales`;
           animations: true,
           debounce: 380,
           spacing: "normal",
-          uiMode: "auto"
+          uiMode: "auto",
+          contentMode: "visual"
         },
         past: [],
         future: [],
@@ -1708,7 +1869,8 @@ Deep Learning -> usa -> Redes neuronales`;
         drag: null,
         pan: null,
         selectionRect: null,
-        typingBefore: null
+        typingBefore: null,
+        visualAddMode: "root"
       };
 
       function $(selector, root = document) {
@@ -1736,8 +1898,21 @@ Deep Learning -> usa -> Redes neuronales`;
 
       function cacheDom() {
         dom.appShell = $("#appShell");
+        dom.leftPanel = $("#leftPanel");
+        dom.leftPanelTitle = $("#leftPanelTitle");
+        dom.contentModeTabs = $("#contentModeTabs");
+        dom.visualBuilderPane = $("#visualBuilderPane");
+        dom.markdownPane = $("#markdownPane");
         dom.editor = $("#markdownEditor");
         dom.lineNumbers = $("#lineNumbers");
+        dom.addModeSegment = $("#addModeSegment");
+        dom.visualNodeText = $("#visualNodeText");
+        dom.visualParentSelect = $("#visualParentSelect");
+        dom.visualBatchText = $("#visualBatchText");
+        dom.visualBatchParentSelect = $("#visualBatchParentSelect");
+        dom.visualRelationSource = $("#visualRelationSource");
+        dom.visualRelationTarget = $("#visualRelationTarget");
+        dom.visualRelationLabel = $("#visualRelationLabel");
         dom.canvasShell = $("#canvasShell");
         dom.svg = $("#mapSvg");
         dom.emptyState = $("#emptyState");
@@ -1792,6 +1967,33 @@ Deep Learning -> usa -> Redes neuronales`;
             dom.editor.setRangeText("  ", start, end, "end");
             dom.editor.dispatchEvent(new Event("input", { bubbles: true }));
           }
+        });
+
+        dom.contentModeTabs.addEventListener("click", (event) => {
+          const button = event.target.closest("[data-content-mode]");
+          if (!button) return;
+          state.settings.contentMode = button.dataset.contentMode;
+          renderAll();
+        });
+
+        dom.addModeSegment.addEventListener("click", (event) => {
+          const button = event.target.closest("[data-add-mode]");
+          if (!button) return;
+          state.visualAddMode = button.dataset.addMode;
+          renderVisualBuilder();
+          dom.visualNodeText.focus();
+        });
+
+        dom.visualNodeText.addEventListener("keydown", (event) => {
+          if (event.key !== "Enter") return;
+          event.preventDefault();
+          addVisualNodeFromForm();
+        });
+
+        dom.visualBatchText.addEventListener("keydown", (event) => {
+          if (event.key !== "Enter" || !(event.ctrlKey || event.metaKey)) return;
+          event.preventDefault();
+          addVisualBatch();
         });
 
         dom.mapTypeSelect.addEventListener("change", () => {
@@ -2066,6 +2268,10 @@ Deep Learning -> usa -> Redes neuronales`;
           "add-node": addRootNode,
           "add-child": addChildNode,
           "add-sibling": addSiblingNode,
+          "visual-focus-input": () => dom.visualNodeText.focus(),
+          "visual-add-node": addVisualNodeFromForm,
+          "visual-add-batch": addVisualBatch,
+          "visual-add-relation": addVisualRelation,
           connect: toggleConnectMode,
           organize: () => mutate(() => layoutNodes(false), "Organizar mapa"),
           "toggle-left": toggleLeft,
@@ -2649,6 +2855,8 @@ Deep Learning -> usa -> Redes neuronales`;
         dom.searchInput.value = state.searchQuery;
         renderPalette();
         renderSettingsControls();
+        renderContentMode();
+        renderVisualBuilder();
         const rec = recommendLayout();
         dom.recommendation.textContent = `Auto: ${rec}`;
         dom.zoomLabel.textContent = `${Math.round(state.viewport.zoom * 100)}%`;
@@ -2687,6 +2895,71 @@ Deep Learning -> usa -> Redes neuronales`;
         $("#gridToggle").checked = state.settings.grid;
         $("#snapToggle").checked = state.settings.snap;
         $("#animationsToggle").checked = state.settings.animations;
+      }
+
+      function renderContentMode() {
+        const mode = state.settings.contentMode === "markdown" ? "markdown" : "visual";
+        state.settings.contentMode = mode;
+        dom.leftPanel.dataset.contentMode = mode;
+        dom.leftPanelTitle.textContent = mode === "visual" ? "Nodos" : "Markdown";
+        dom.visualBuilderPane.classList.toggle("hidden", mode !== "visual");
+        dom.markdownPane.classList.toggle("hidden", mode !== "markdown");
+        $all("[data-content-mode]", dom.contentModeTabs).forEach((button) => {
+          button.classList.toggle("active", button.dataset.contentMode === mode);
+        });
+        $all("[data-mode-only]").forEach((item) => {
+          item.classList.toggle("hidden", item.dataset.modeOnly !== mode);
+        });
+      }
+
+      function renderVisualBuilder() {
+        if (!dom.visualParentSelect) return;
+        const selectedId = firstSelectedId();
+        const parentValue = selectedId || dom.visualParentSelect.value || "";
+        const batchValue = selectedId || dom.visualBatchParentSelect.value || "";
+        const sourceValue = dom.visualRelationSource.value || selectedId || "";
+        const targetValue = dom.visualRelationTarget.value || "";
+        const parentOptions = nodeSelectOptions({ includeRoot: true });
+        const relationOptions = nodeSelectOptions({ includeRoot: false });
+
+        dom.visualParentSelect.innerHTML = parentOptions;
+        dom.visualBatchParentSelect.innerHTML = parentOptions;
+        dom.visualRelationSource.innerHTML = relationOptions;
+        dom.visualRelationTarget.innerHTML = relationOptions;
+
+        const reference = state.visualAddMode === "sibling" ? (selectedId || parentValue || "") : parentValue;
+        setSelectValue(dom.visualParentSelect, reference);
+        setSelectValue(dom.visualBatchParentSelect, batchValue || selectedId || "");
+        setSelectValue(dom.visualRelationSource, sourceValue || (state.nodes[0] && state.nodes[0].id) || "");
+        const source = dom.visualRelationSource.value;
+        const fallbackTarget = state.nodes.find((node) => node.id !== source);
+        setSelectValue(dom.visualRelationTarget, targetValue && targetValue !== source ? targetValue : (fallbackTarget && fallbackTarget.id) || "");
+
+        $all("[data-add-mode]", dom.addModeSegment).forEach((button) => {
+          button.classList.toggle("active", button.dataset.addMode === state.visualAddMode);
+        });
+
+        const needsReference = state.visualAddMode !== "root";
+        dom.visualParentSelect.disabled = !needsReference || !state.nodes.length;
+        dom.visualBatchParentSelect.disabled = !state.nodes.length;
+        dom.visualRelationSource.disabled = state.nodes.length < 2;
+        dom.visualRelationTarget.disabled = state.nodes.length < 2;
+      }
+
+      function nodeSelectOptions({ includeRoot }) {
+        const options = includeRoot ? ['<option value="">Sin padre</option>'] : [];
+        state.nodes.forEach((node) => {
+          const pad = "&nbsp;".repeat(Math.max(0, node.level - 1) * 2);
+          options.push(`<option value="${escapeHtml(node.id)}">${pad}${escapeHtml(node.text)}</option>`);
+        });
+        if (!options.length) options.push('<option value="">Sin nodos</option>');
+        return options.join("");
+      }
+
+      function setSelectValue(select, value) {
+        if (!select) return;
+        const exists = Array.from(select.options).some((option) => option.value === value);
+        select.value = exists ? value : (select.options[0] ? select.options[0].value : "");
       }
 
       function renderCanvas() {
@@ -3067,6 +3340,220 @@ Deep Learning -> usa -> Redes neuronales`;
         return state.edges.find((edge) => edge && edge.id === id) || null;
       }
 
+      function addVisualNodeFromForm() {
+        const text = dom.visualNodeText.value.trim() || defaultVisualTitle(state.visualAddMode);
+        const referenceId = state.visualAddMode === "root" ? null : dom.visualParentSelect.value;
+        let createdId = null;
+        mutate(() => {
+          const node = createVisualNode(uniqueTitle(text), state.visualAddMode, referenceId);
+          if (node) createdId = node.id;
+          refreshMarkdownFromGraph();
+        }, "Agregar nodo");
+        dom.visualNodeText.value = "";
+        dom.visualNodeText.focus();
+        if (createdId) centerOnNode(createdId);
+      }
+
+      function addVisualBatch() {
+        const lines = dom.visualBatchText.value
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter(Boolean);
+        if (!lines.length) {
+          toast("Escribe al menos un nodo");
+          return;
+        }
+        const parentId = dom.visualBatchParentSelect.value;
+        const mode = parentId ? "child" : "root";
+        let firstCreatedId = null;
+        mutate(() => {
+          lines.forEach((line, index) => {
+            const node = createVisualNode(uniqueTitle(line), mode, parentId, index);
+            if (node && !firstCreatedId) firstCreatedId = node.id;
+          });
+          refreshMarkdownFromGraph();
+        }, "Agregar varios nodos");
+        dom.visualBatchText.value = "";
+        if (firstCreatedId) centerOnNode(firstCreatedId);
+      }
+
+      function addVisualRelation() {
+        const source = dom.visualRelationSource.value;
+        const target = dom.visualRelationTarget.value;
+        if (!source || !target || source === target) {
+          toast("Elige dos nodos distintos");
+          return;
+        }
+        let edgeId = null;
+        mutate(() => {
+          const edge = createManualEdge(source, target, dom.visualRelationLabel.value.trim() || "relacion");
+          if (edge) {
+            edgeId = edge.id;
+            state.selectedIds = [];
+            state.selectedEdgeId = edge.id;
+          }
+        }, "Crear relacion");
+        if (edgeId) dom.visualRelationLabel.value = "";
+      }
+
+      function createVisualNode(text, mode, referenceId, offsetIndex = 0) {
+        const reference = getNode(referenceId);
+        const hierarchy = hierarchyMaps(state.nodes, state.edges);
+        const parentId = mode === "child" && reference
+          ? reference.id
+          : mode === "sibling" && reference
+            ? hierarchy.parent.get(reference.id) || null
+            : null;
+        const parent = getNode(parentId);
+        const level = parent ? Math.min(parent.level + 1, 9) : reference && mode === "sibling" ? reference.level : 1;
+        const id = nextNodeId(text);
+        const point = visualNodePosition(mode, reference, parent, offsetIndex);
+        const node = {
+          id,
+          parentId,
+          text: text.trim() || "Sin titulo",
+          level,
+          children: [],
+          sourceLine: null,
+          kind: "visual",
+          style: {},
+          x: point.x,
+          y: point.y
+        };
+        state.nodes.push(node);
+        if (parentId) {
+          const parentNode = getNode(parentId);
+          if (parentNode && Array.isArray(parentNode.children)) parentNode.children.push(id);
+          state.edges.push({
+            id: `e-${parentId}-${id}-hier`,
+            source: parentId,
+            target: id,
+            label: "",
+            kind: "hierarchy",
+            directed: true,
+            style: {}
+          });
+        }
+        if (!state.name || state.name === "Mapa sin titulo") state.name = node.text;
+        state.selectedIds = [id];
+        state.selectedEdgeId = null;
+        return node;
+      }
+
+      function visualNodePosition(mode, reference, parent, offsetIndex = 0) {
+        const spacing = getSpacing(state.settings.spacing, state.nodes.length + 1);
+        const horizontal = state.mapType === "treeHorizontal" || state.mapType === "mindHorizontal" || state.mapType === "flow";
+        const vertical = state.mapType === "treeVertical" || state.mapType === "org";
+        if (mode === "sibling" && reference) {
+          return snapPoint({
+            x: reference.x + (horizontal ? 0 : spacing.x * 0.34),
+            y: reference.y + spacing.y * 0.86 * (offsetIndex + 1)
+          });
+        }
+        if (parent) {
+          const childCount = hierarchyMaps(state.nodes, state.edges).children.get(parent.id)?.length || 0;
+          const index = childCount + offsetIndex;
+          if (horizontal) {
+            return snapPoint({
+              x: parent.x + spacing.x,
+              y: parent.y + (index - childCount / 2) * spacing.y * 0.82
+            });
+          }
+          if (vertical) {
+            return snapPoint({
+              x: parent.x + (index - childCount / 2) * spacing.x * 0.78,
+              y: parent.y + spacing.y
+            });
+          }
+          const angle = -Math.PI / 2 + (index % 8) * (Math.PI * 2 / 8);
+          return snapPoint({
+            x: parent.x + Math.cos(angle) * spacing.r,
+            y: parent.y + Math.sin(angle) * spacing.r
+          });
+        }
+        if (!state.nodes.length) return { x: 0, y: 0 };
+        const boxes = state.nodes.map((node) => {
+          const box = nodeBox(node);
+          return {
+            maxX: node.x + box.width / 2,
+            y: node.y
+          };
+        });
+        return snapPoint({
+          x: Math.max(...boxes.map((box) => box.maxX)) + spacing.x,
+          y: boxes.reduce((sum, box) => sum + box.y, 0) / boxes.length + offsetIndex * spacing.y
+        });
+      }
+
+      function nextNodeId(text) {
+        let index = 0;
+        let id = "";
+        do {
+          id = `n-${hashString(`${text}|visual|${Date.now()}|${index}`)}`;
+          index += 1;
+        } while (state.nodes.some((node) => node.id === id));
+        return id;
+      }
+
+      function defaultVisualTitle(mode) {
+        if (mode === "child") return "Nuevo concepto";
+        if (mode === "sibling") return "Nuevo hermano";
+        return "Nuevo mapa";
+      }
+
+      function refreshMarkdownFromGraph() {
+        state.markdown = markdownFromGraph();
+        dom.editor.value = state.markdown;
+        updateLineNumbers();
+      }
+
+      function markdownFromGraph() {
+        if (!state.nodes.length) return "";
+        const hierarchy = hierarchyMaps(state.nodes, state.edges);
+        const lines = [];
+        const visited = new Set();
+        const roots = hierarchy.roots.length ? hierarchy.roots : [state.nodes[0].id];
+
+        const walk = (id, depth) => {
+          const node = getNode(id);
+          if (!node || visited.has(id)) return;
+          visited.add(id);
+          const level = clamp(depth, 1, 6);
+          lines.push(`${"#".repeat(level)} ${markdownLineText(node.text)}`);
+          (hierarchy.children.get(id) || []).forEach((childId) => walk(childId, depth + 1));
+        };
+
+        roots.forEach((id, index) => {
+          if (index > 0 && lines.length) lines.push("");
+          walk(id, 1);
+        });
+        state.nodes.forEach((node) => {
+          if (visited.has(node.id)) return;
+          if (lines.length) lines.push("");
+          walk(node.id, 1);
+        });
+
+        const relationEdges = state.edges.filter((edge) => {
+          if (edge.kind !== "relation") return false;
+          return getNode(edge.source) && getNode(edge.target);
+        });
+        if (relationEdges.length) {
+          lines.push("");
+          relationEdges.forEach((edge) => {
+            const source = markdownLineText(getNode(edge.source).text);
+            const target = markdownLineText(getNode(edge.target).text);
+            const label = markdownLineText(edge.label || "");
+            lines.push(label ? `${source} -> ${label} -> ${target}` : `${source} --> ${target}`);
+          });
+        }
+
+        return `${lines.join("\n").replace(/\n{3,}/g, "\n\n").trim()}\n`;
+      }
+
+      function markdownLineText(text) {
+        return cleanMarkdownText(String(text || "").replace(/\s+/g, " ")) || "Sin titulo";
+      }
+
       function visibleNodes() {
         if (!state.nodes.length) return [];
         const hidden = new Set();
@@ -3105,7 +3592,6 @@ Deep Learning -> usa -> Redes neuronales`;
       function updateNodeText(id, text) {
         const node = getNode(id);
         if (!node) return;
-        const oldText = node.text;
         node.text = text;
         if (Number.isInteger(node.sourceLine)) {
           const lines = state.markdown.split(/\r?\n/);
@@ -3118,57 +3604,42 @@ Deep Learning -> usa -> Redes neuronales`;
           dom.editor.value = state.markdown;
           updateLineNumbers();
         } else {
-          state.markdown = state.markdown.replace(oldText, text);
-          dom.editor.value = state.markdown;
-          updateLineNumbers();
+          refreshMarkdownFromGraph();
         }
       }
 
       function addRootNode() {
+        let createdId = null;
         mutate(() => {
-          const title = uniqueTitle("Nuevo mapa");
-          state.markdown = state.markdown.trimEnd() + `\n\n# ${title}`;
-          dom.editor.value = state.markdown;
-          syncMarkdown(state.markdown, { preserve: true, layoutMissing: true });
-          const node = state.nodes.find((item) => item.text === title);
-          if (node) state.selectedIds = [node.id];
+          const node = createVisualNode(uniqueTitle("Nuevo mapa"), "root", null);
+          if (node) createdId = node.id;
+          refreshMarkdownFromGraph();
         }, "Anadir nodo");
+        if (createdId) centerOnNode(createdId);
       }
 
       function addChildNode() {
         const parent = getNode(firstSelectedId());
         if (!parent) return addRootNode();
+        let createdId = null;
         mutate(() => {
-          const title = uniqueTitle("Nuevo concepto");
-          const level = Math.min(parent.level + 1, 6);
-          insertMarkdownAfterSubtree(parent, level, title);
-          dom.editor.value = state.markdown;
-          syncMarkdown(state.markdown, { preserve: true, layoutMissing: true });
-          const node = state.nodes.find((item) => item.text === title);
-          if (node) {
-            node.x = parent.x + 190;
-            node.y = parent.y + 100;
-            state.selectedIds = [node.id];
-          }
+          const node = createVisualNode(uniqueTitle("Nuevo concepto"), "child", parent.id);
+          if (node) createdId = node.id;
+          refreshMarkdownFromGraph();
         }, "Anadir hijo");
+        if (createdId) centerOnNode(createdId);
       }
 
       function addSiblingNode() {
         const current = getNode(firstSelectedId());
         if (!current) return addRootNode();
+        let createdId = null;
         mutate(() => {
-          const title = uniqueTitle("Nuevo hermano");
-          const level = Math.min(Math.max(current.level, 1), 6);
-          insertMarkdownAfterSubtree(current, level, title);
-          dom.editor.value = state.markdown;
-          syncMarkdown(state.markdown, { preserve: true, layoutMissing: true });
-          const node = state.nodes.find((item) => item.text === title);
-          if (node) {
-            node.x = current.x + 70;
-            node.y = current.y + 120;
-            state.selectedIds = [node.id];
-          }
+          const node = createVisualNode(uniqueTitle("Nuevo hermano"), "sibling", current.id);
+          if (node) createdId = node.id;
+          refreshMarkdownFromGraph();
         }, "Anadir hermano");
+        if (createdId) centerOnNode(createdId);
       }
 
       function deleteSelected() {
@@ -3177,6 +3648,7 @@ Deep Learning -> usa -> Redes neuronales`;
           if (state.selectedEdgeId) {
             state.edges = state.edges.filter((edge) => edge.id !== state.selectedEdgeId);
             state.selectedEdgeId = null;
+            refreshMarkdownFromGraph();
             return;
           }
           const remove = new Set(state.selectedIds);
@@ -3186,6 +3658,7 @@ Deep Learning -> usa -> Redes neuronales`;
           state.nodes = state.nodes.filter((node) => !remove.has(node.id));
           state.edges = state.edges.filter((edge) => !remove.has(edge.source) && !remove.has(edge.target));
           state.selectedIds = [];
+          refreshMarkdownFromGraph();
         }, "Eliminar");
       }
 
@@ -3259,6 +3732,7 @@ Deep Learning -> usa -> Redes neuronales`;
           state.nodes.push(...pastedNodes);
           state.edges.push(...pastedEdges);
           state.selectedIds = pastedNodes.map((node) => node.id);
+          refreshMarkdownFromGraph();
         }, "Pegar");
       }
 
@@ -3284,20 +3758,23 @@ Deep Learning -> usa -> Redes neuronales`;
         renderAll(false);
       }
 
-      function createManualEdge(source, target) {
+      function createManualEdge(source, target, label = "relacion") {
         if (source === target) return;
-        const exists = state.edges.some((edge) => edge.source === source && edge.target === target);
+        const exists = state.edges.some((edge) => edge.kind === "relation" && edge.source === source && edge.target === target);
         if (exists) return;
-        state.edges.push({
+        const edge = {
           id: `e-${source}-${target}-${hashString(Date.now().toString())}`,
           source,
           target,
-          label: "relacion",
+          label: label.trim() || "relacion",
           kind: "relation",
           directed: true,
           manual: true,
           style: { line: "bezier", width: 2.4 }
-        });
+        };
+        state.edges.push(edge);
+        refreshMarkdownFromGraph();
+        return edge;
       }
 
       function toggleCollapseBranch() {

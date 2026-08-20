@@ -1,9 +1,10 @@
 # MapLab
 
-MapLab es una pagina estatica para convertir Markdown en mapas visuales editables. Funciona directo en GitHub Pages: no requiere backend, compilacion ni instalacion.
+MapLab es una pagina estatica para crear mapas visuales editables desde un constructor de nodos o desde Markdown. Funciona directo en GitHub Pages: no requiere backend, compilacion ni instalacion.
 
 ## Caracteristicas
 
+- Constructor visual para agregar nodos raiz, hijos, hermanos, listas de nodos y relaciones sin escribir Markdown.
 - Editor Markdown con numeros de linea, plantillas, importar y descargar `.md`.
 - Parser para titulos, listas y relaciones como `A --> B`, `A --relacion--> B` y `A <--> B`.
 - Lienzo SVG con zoom, pan, seleccion multiple, arrastre de nodos y conexiones editables.
