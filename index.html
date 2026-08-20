@@ -418,6 +418,155 @@
       justify-content: center;
     }
 
+    .shape-palette {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 7px;
+    }
+
+    .shape-option {
+      display: grid;
+      place-items: center;
+      min-height: 42px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: var(--panel-strong);
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .shape-option:hover,
+    .shape-option.active {
+      border-color: color-mix(in srgb, var(--accent) 56%, var(--border));
+      background: color-mix(in srgb, var(--accent) 10%, var(--panel-strong));
+      color: var(--accent);
+    }
+
+    .shape-option.extra-shape {
+      display: none;
+    }
+
+    .shape-palette.expanded .shape-option.extra-shape {
+      display: grid;
+    }
+
+    .shape-preview {
+      position: relative;
+      width: 28px;
+      height: 20px;
+      border: 2px solid currentColor;
+      background: color-mix(in srgb, currentColor 8%, transparent);
+    }
+
+    .shape-preview.rounded { border-radius: 6px; }
+    .shape-preview.rect { border-radius: 1px; }
+    .shape-preview.square {
+      width: 24px;
+      height: 24px;
+      border-radius: 1px;
+    }
+    .shape-preview.pill { border-radius: 999px; }
+    .shape-preview.circle {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+    }
+    .shape-preview.oval {
+      width: 30px;
+      height: 20px;
+      border-radius: 50%;
+    }
+    .shape-preview.diamond {
+      width: 23px;
+      height: 23px;
+      transform: rotate(45deg);
+      border-radius: 2px;
+    }
+    .shape-preview.hex {
+      width: 30px;
+      border: 0;
+      clip-path: polygon(14% 0, 86% 0, 100% 50%, 86% 100%, 14% 100%, 0 50%);
+      background: currentColor;
+      opacity: 0.8;
+    }
+    .shape-preview.triangle {
+      width: 0;
+      height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-bottom: 24px solid currentColor;
+      background: transparent;
+    }
+    .shape-preview.parallelogram {
+      transform: skewX(-16deg);
+    }
+    .shape-preview.cylinder {
+      height: 25px;
+      border-radius: 50% / 18%;
+    }
+    .shape-preview.document {
+      border-radius: 2px;
+      clip-path: polygon(0 0, 78% 0, 100% 24%, 100% 100%, 0 100%);
+    }
+    .shape-preview.note {
+      border-radius: 2px;
+      clip-path: polygon(0 0, 100% 0, 100% 76%, 78% 100%, 0 100%);
+    }
+    .shape-preview.cloud {
+      width: 30px;
+      border-radius: 999px;
+    }
+    .shape-preview.bubble {
+      width: 29px;
+      border-radius: 8px;
+    }
+    .shape-preview.text,
+    .shape-preview.heading {
+      width: 31px;
+      height: 18px;
+      border: 0;
+      background: transparent;
+    }
+    .shape-preview.text::before,
+    .shape-preview.heading::before {
+      content: "T";
+      position: absolute;
+      inset: -2px 0 0;
+      text-align: center;
+      font-weight: 800;
+      font-size: 19px;
+    }
+    .shape-preview.heading::after {
+      content: "";
+      position: absolute;
+      left: 3px;
+      right: 3px;
+      bottom: 1px;
+      height: 2px;
+      background: currentColor;
+    }
+
+    .check-list {
+      display: grid;
+      gap: 7px;
+    }
+
+    .check-option {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 32px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .check-option input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent);
+    }
+
     .editor-wrap {
       display: grid;
       grid-template-columns: 46px 1fr;
@@ -1160,6 +1309,12 @@
           <section class="content-pane" id="visualBuilderPane" aria-label="Constructor de nodos">
             <div class="builder-scroll">
               <div class="builder-section">
+                <div class="section-title"><i data-lucide="shapes"></i><span>Formas</span></div>
+                <div class="shape-palette" id="visualShapePalette" aria-label="Paleta de formas"></div>
+                <button class="chip-btn full" data-action="toggle-more-shapes" style="margin-top: 10px;"><i data-lucide="plus"></i>Mas formas</button>
+              </div>
+
+              <div class="builder-section">
                 <div class="section-title"><i data-lucide="circle-plus"></i><span>Agregar nodo</span></div>
                 <div class="segmented" id="addModeSegment">
                   <button class="active" data-add-mode="root" type="button">Raiz</button>
@@ -1298,6 +1453,37 @@
           <div class="section">
             <div class="section-title"><i data-lucide="mouse-pointer-2"></i><span>Seleccion</span></div>
             <div id="selectionSummary" class="canvas-meta" style="width: 100%; justify-content: center;">Nada seleccionado</div>
+          </div>
+
+          <div class="section">
+            <div class="section-title"><i data-lucide="panel-top"></i><span>Vista</span></div>
+            <div class="check-list">
+              <label class="check-option"><input id="viewGridToggle" type="checkbox" />Cuadricula</label>
+              <label class="check-option"><input id="pageViewToggle" type="checkbox" />Vista de pagina</label>
+              <label class="check-option"><input id="backgroundToggle" type="checkbox" />Fondo</label>
+              <label class="check-option"><input id="connectionArrowsToggle" type="checkbox" />Flechas de conexion</label>
+              <label class="check-option"><input id="connectionPointsToggle" type="checkbox" />Puntos de conexion</label>
+              <label class="check-option"><input id="guidesToggle" type="checkbox" />Guias</label>
+            </div>
+            <div class="field-row" style="margin-top: 10px;">
+              <div class="field">
+                <label for="viewGridSizeInput">Tamano</label>
+                <input id="viewGridSizeInput" type="number" min="8" max="120" step="2" />
+              </div>
+              <div class="field">
+                <label for="pageBackgroundInput">Fondo</label>
+                <input id="pageBackgroundInput" type="color" />
+              </div>
+            </div>
+            <div class="field" style="margin-top: 10px;">
+              <label for="pageSizeSelect">Tamano del papel</label>
+              <select id="pageSizeSelect">
+                <option value="letter">Carta horizontal</option>
+                <option value="a4">A4 horizontal</option>
+                <option value="wide">Pantalla 16:9</option>
+                <option value="square">Cuadrado</option>
+              </select>
+            </div>
           </div>
 
           <div class="section" id="nodeInspector">
@@ -1593,13 +1779,21 @@ Deep Learning -> usa -> Redes neuronales`;
       ];
 
       const SHAPES = [
+        ["text", "Texto"],
+        ["heading", "Titulo"],
         ["rounded", "Redondeado"],
         ["rect", "Rectangulo"],
+        ["square", "Cuadrado"],
         ["pill", "Pildora"],
         ["circle", "Circulo"],
         ["oval", "Ovalo"],
-        ["hex", "Hexagono"],
         ["diamond", "Diamante"],
+        ["parallelogram", "Paralelogramo"],
+        ["hex", "Hexagono"],
+        ["triangle", "Triangulo"],
+        ["cylinder", "Base de datos"],
+        ["document", "Documento"],
+        ["note", "Nota"],
         ["card", "Tarjeta"],
         ["cloud", "Nube"],
         ["bubble", "Burbuja"]
@@ -1854,6 +2048,13 @@ Deep Learning -> usa -> Redes neuronales`;
           grid: true,
           gridSize: 32,
           snap: false,
+          pageView: true,
+          pageSize: "letter",
+          backgroundEnabled: false,
+          backgroundColor: "#ffffff",
+          connectionArrows: true,
+          connectionPoints: true,
+          guides: true,
           animations: true,
           debounce: 380,
           spacing: "normal",
@@ -1871,7 +2072,9 @@ Deep Learning -> usa -> Redes neuronales`;
         pan: null,
         selectionRect: null,
         typingBefore: null,
-        visualAddMode: "root"
+        visualAddMode: "root",
+        visualShape: "rounded",
+        visualMoreShapes: false
       };
 
       function $(selector, root = document) {
@@ -1906,6 +2109,8 @@ Deep Learning -> usa -> Redes neuronales`;
         dom.editor = $("#markdownEditor");
         dom.lineNumbers = $("#lineNumbers");
         dom.addModeSegment = $("#addModeSegment");
+        dom.visualShapePalette = $("#visualShapePalette");
+        dom.visualMoreShapesButton = $("[data-action='toggle-more-shapes']");
         dom.visualNodeText = $("#visualNodeText");
         dom.visualParentSelect = $("#visualParentSelect");
         dom.visualBatchText = $("#visualBatchText");
@@ -1947,6 +2152,9 @@ Deep Learning -> usa -> Redes neuronales`;
         dom.templateSelect.innerHTML = TEMPLATES.map((item) => `<option value="${item.id}">${item.name}</option>`).join("");
         dom.paletteSelect.innerHTML = Object.entries(PALETTES).map(([id, palette]) => `<option value="${id}">${palette.name}</option>`).join("");
         $("#nodeShape").innerHTML = SHAPES.map(([id, label]) => `<option value="${id}">${label}</option>`).join("");
+        dom.visualShapePalette.innerHTML = SHAPES.map(([id, label], index) => (
+          `<button class="shape-option${index >= 10 ? " extra-shape" : ""}" data-shape-pick="${id}" type="button" title="${label}" aria-label="${label}"><span class="shape-preview ${id}"></span></button>`
+        )).join("");
       }
 
       function bindEvents() {
@@ -1981,7 +2189,26 @@ Deep Learning -> usa -> Redes neuronales`;
           if (!button) return;
           state.visualAddMode = button.dataset.addMode;
           renderVisualBuilder();
-          dom.visualNodeText.focus();
+          dom.visualNodeText.focus({ preventScroll: true });
+        });
+
+        dom.visualShapePalette.addEventListener("click", (event) => {
+          const button = event.target.closest("[data-shape-pick]");
+          if (!button) return;
+          state.visualShape = button.dataset.shapePick;
+          if (state.selectedIds.length) {
+            mutate(() => {
+              state.selectedIds.forEach((id) => {
+                const node = getNode(id);
+                if (!node) return;
+                node.style = node.style || {};
+                node.style.shape = state.visualShape;
+              });
+            }, "Cambiar forma");
+          } else {
+            renderAll(false);
+          }
+          dom.visualNodeText.focus({ preventScroll: true });
         });
 
         dom.visualNodeText.addEventListener("keydown", (event) => {
@@ -2228,9 +2455,18 @@ Deep Learning -> usa -> Redes neuronales`;
           ["#spacingMode", "spacing", "change"],
           ["#debounceInput", "debounce", "input"],
           ["#gridSizeInput", "gridSize", "input"],
+          ["#viewGridSizeInput", "gridSize", "input"],
           ["#autosaveToggle", "autosave", "change"],
           ["#gridToggle", "grid", "change"],
+          ["#viewGridToggle", "grid", "change"],
           ["#snapToggle", "snap", "change"],
+          ["#pageViewToggle", "pageView", "change"],
+          ["#pageSizeSelect", "pageSize", "change"],
+          ["#backgroundToggle", "backgroundEnabled", "change"],
+          ["#pageBackgroundInput", "backgroundColor", "input"],
+          ["#connectionArrowsToggle", "connectionArrows", "change"],
+          ["#connectionPointsToggle", "connectionPoints", "change"],
+          ["#guidesToggle", "guides", "change"],
           ["#animationsToggle", "animations", "change"]
         ];
         mapping.forEach(([selector, key, eventName]) => {
@@ -2239,7 +2475,7 @@ Deep Learning -> usa -> Redes neuronales`;
               const input = event.target;
               if (input.type === "checkbox") {
                 state.settings[key] = input.checked;
-              } else if (input.type === "range") {
+              } else if (input.type === "range" || input.type === "number") {
                 state.settings[key] = Number(input.value);
               } else {
                 state.settings[key] = input.value;
@@ -2272,6 +2508,7 @@ Deep Learning -> usa -> Redes neuronales`;
           "visual-add-node": addVisualNodeFromForm,
           "visual-add-batch": addVisualBatch,
           "visual-add-relation": addVisualRelation,
+          "toggle-more-shapes": toggleMoreShapes,
           connect: toggleConnectMode,
           organize: () => mutate(() => layoutNodes(false), "Organizar mapa"),
           "toggle-left": toggleLeft,
@@ -2831,7 +3068,7 @@ Deep Learning -> usa -> Redes neuronales`;
       function applyTheme() {
         const theme = getTheme();
         const root = document.documentElement;
-        root.style.setProperty("--canvas-bg", theme.background);
+        root.style.setProperty("--canvas-bg", canvasSurfaceColor());
         root.style.setProperty("--canvas-grid", theme.grid);
         root.style.setProperty("--accent", theme.accentColor);
         root.style.setProperty("--accent-2", state.paletteId === "orange" ? "#f59f00" : "#12b886");
@@ -2894,6 +3131,15 @@ Deep Learning -> usa -> Redes neuronales`;
         $("#autosaveToggle").checked = state.settings.autosave;
         $("#gridToggle").checked = state.settings.grid;
         $("#snapToggle").checked = state.settings.snap;
+        $("#viewGridToggle").checked = state.settings.grid;
+        $("#viewGridSizeInput").value = state.settings.gridSize;
+        $("#pageViewToggle").checked = state.settings.pageView !== false;
+        $("#pageSizeSelect").value = state.settings.pageSize || "letter";
+        $("#backgroundToggle").checked = Boolean(state.settings.backgroundEnabled);
+        $("#pageBackgroundInput").value = normalizeColorToHex(state.settings.backgroundColor || "#ffffff");
+        $("#connectionArrowsToggle").checked = state.settings.connectionArrows !== false;
+        $("#connectionPointsToggle").checked = state.settings.connectionPoints !== false;
+        $("#guidesToggle").checked = state.settings.guides !== false;
         $("#animationsToggle").checked = state.settings.animations;
       }
 
@@ -2938,6 +3184,13 @@ Deep Learning -> usa -> Redes neuronales`;
         $all("[data-add-mode]", dom.addModeSegment).forEach((button) => {
           button.classList.toggle("active", button.dataset.addMode === state.visualAddMode);
         });
+        dom.visualShapePalette.classList.toggle("expanded", Boolean(state.visualMoreShapes));
+        $all("[data-shape-pick]", dom.visualShapePalette).forEach((button) => {
+          button.classList.toggle("active", button.dataset.shapePick === state.visualShape);
+        });
+        if (dom.visualMoreShapesButton) {
+          dom.visualMoreShapesButton.classList.toggle("active", Boolean(state.visualMoreShapes));
+        }
 
         const needsReference = state.visualAddMode !== "root";
         dom.visualParentSelect.disabled = !needsReference || !state.nodes.length;
@@ -2981,7 +3234,7 @@ Deep Learning -> usa -> Redes neuronales`;
           y: 0,
           width,
           height,
-          fill: getTheme().background
+          fill: canvasSurfaceColor()
         });
         svg.appendChild(bg);
 
@@ -2989,6 +3242,13 @@ Deep Learning -> usa -> Redes neuronales`;
           transform: `translate(${state.viewport.x} ${state.viewport.y}) scale(${state.viewport.zoom})`
         });
         svg.appendChild(world);
+
+        if (state.settings.pageView !== false) {
+          world.appendChild(renderPageView());
+        }
+        if (!state.isExporting && state.settings.guides !== false && state.selectedIds.length) {
+          world.appendChild(renderGuides());
+        }
 
         const edgeLayer = svgEl("g", { "data-layer": "edges" });
         const nodeLayer = svgEl("g", { "data-layer": "nodes" });
@@ -3002,6 +3262,58 @@ Deep Learning -> usa -> Redes neuronales`;
 
         visibleNodes().forEach((node) => nodeLayer.appendChild(renderNode(node)));
         dom.emptyState.classList.toggle("visible", state.nodes.length === 0);
+      }
+
+      function renderPageView() {
+        const { width: pageWidth, height: pageHeight } = pageDimensions();
+        const group = svgEl("g", { "data-layer": "page-view", "pointer-events": "none" });
+        group.appendChild(svgEl("rect", {
+          x: -pageWidth / 2,
+          y: -pageHeight / 2,
+          width: pageWidth,
+          height: pageHeight,
+          rx: 8,
+          fill: pageFillColor(),
+          stroke: colorWithAlpha(getTheme().edgeColor, 0.28),
+          "stroke-width": 1.2,
+          "stroke-dasharray": "10 8"
+        }));
+        group.appendChild(svgEl("rect", {
+          x: -pageWidth / 2 + 10,
+          y: -pageHeight / 2 + 10,
+          width: pageWidth - 20,
+          height: pageHeight - 20,
+          rx: 5,
+          fill: "none",
+          stroke: colorWithAlpha(getTheme().edgeColor, 0.1),
+          "stroke-width": 1
+        }));
+        return group;
+      }
+
+      function pageDimensions() {
+        const sizes = {
+          letter: { width: 1120, height: 760 },
+          a4: { width: 1160, height: 820 },
+          wide: { width: 1280, height: 720 },
+          square: { width: 900, height: 900 }
+        };
+        return sizes[state.settings.pageSize] || sizes.letter;
+      }
+
+      function renderGuides() {
+        const node = getNode(firstSelectedId());
+        const group = svgEl("g", { "data-layer": "guides", "pointer-events": "none" });
+        if (!node) return group;
+        const span = 5000;
+        group.appendChild(svgEl("path", {
+          d: `M ${node.x} ${-span} L ${node.x} ${span} M ${-span} ${node.y} L ${span} ${node.y}`,
+          fill: "none",
+          stroke: colorWithAlpha(getTheme().accentColor, 0.28),
+          "stroke-width": 1,
+          "stroke-dasharray": "8 8"
+        }));
+        return group;
       }
 
       function renderNode(node) {
@@ -3061,6 +3373,10 @@ Deep Learning -> usa -> Redes neuronales`;
         });
         group.appendChild(text);
 
+        if (!state.isExporting && selected && state.settings.connectionPoints !== false) {
+          group.appendChild(renderConnectionPoints(box));
+        }
+
         group.addEventListener("pointerdown", (event) => {
           if (event.button !== 0) return;
           event.stopPropagation();
@@ -3101,37 +3417,121 @@ Deep Learning -> usa -> Redes neuronales`;
         return group;
       }
 
+      function renderConnectionPoints(box) {
+        const points = [
+          [box.width / 2, 0],
+          [box.width, box.height / 2],
+          [box.width / 2, box.height],
+          [0, box.height / 2]
+        ];
+        const group = svgEl("g", { "data-layer": "connection-points", "pointer-events": "none" });
+        points.forEach(([cx, cy]) => {
+          group.appendChild(svgEl("circle", {
+            cx,
+            cy,
+            r: 4,
+            fill: canvasSurfaceColor(),
+            stroke: getTheme().accentColor,
+            "stroke-width": 1.6
+          }));
+        });
+        return group;
+      }
+
       function renderShape(node, visual, box, selected, searchHit) {
+        const kind = node.style && node.style.shape ? node.style.shape : "rounded";
+        const transparentShape = kind === "text" || kind === "heading";
         const common = {
-          fill: visual.fill,
+          fill: transparentShape ? "transparent" : visual.fill,
           stroke: selected ? getTheme().accentColor : searchHit ? "#f59f00" : visual.border,
-          "stroke-width": selected ? visual.borderWidth + 2 : searchHit ? visual.borderWidth + 1.5 : visual.borderWidth
+          "stroke-width": selected ? visual.borderWidth + 2 : searchHit ? visual.borderWidth + 1.5 : visual.borderWidth,
+          "pointer-events": "all"
         };
+        if (transparentShape && !selected && !searchHit) {
+          common.stroke = "transparent";
+          common["stroke-width"] = 0;
+        }
+        const w = box.width;
+        const h = box.height;
         let shape;
-        if (node.style && node.style.shape === "circle") {
+        if (kind === "circle") {
           const r = Math.max(box.width, box.height) / 2;
           shape = svgEl("circle", { ...common, cx: box.width / 2, cy: box.height / 2, r });
-        } else if (node.style && node.style.shape === "oval") {
+        } else if (kind === "oval") {
           shape = svgEl("ellipse", { ...common, cx: box.width / 2, cy: box.height / 2, rx: box.width / 2, ry: box.height / 2 });
-        } else if (node.style && node.style.shape === "diamond") {
+        } else if (kind === "diamond") {
           shape = svgEl("polygon", { ...common, points: `${box.width / 2},0 ${box.width},${box.height / 2} ${box.width / 2},${box.height} 0,${box.height / 2}` });
-        } else if (node.style && node.style.shape === "hex") {
-          const w = box.width;
-          const h = box.height;
+        } else if (kind === "hex") {
           shape = svgEl("polygon", { ...common, points: `${w * 0.14},0 ${w * 0.86},0 ${w},${h / 2} ${w * 0.86},${h} ${w * 0.14},${h} 0,${h / 2}` });
-        } else if (node.style && node.style.shape === "cloud") {
+        } else if (kind === "triangle") {
+          shape = svgEl("polygon", { ...common, points: `${w / 2},0 ${w},${h} 0,${h}` });
+        } else if (kind === "parallelogram") {
+          shape = svgEl("polygon", { ...common, points: `${w * 0.16},0 ${w},0 ${w * 0.84},${h} 0,${h}` });
+        } else if (kind === "cylinder") {
+          const rim = Math.min(18, h * 0.24);
+          const group = svgEl("g");
+          group.appendChild(svgEl("path", { ...common, d: `M 0 ${rim} C 0 ${rim * 0.32} ${w} ${rim * 0.32} ${w} ${rim} V ${h - rim} C ${w} ${h - rim * 0.32} 0 ${h - rim * 0.32} 0 ${h - rim} Z` }));
+          group.appendChild(svgEl("ellipse", {
+            cx: w / 2,
+            cy: rim,
+            rx: w / 2,
+            ry: rim * 0.68,
+            fill: "none",
+            stroke: common.stroke,
+            "stroke-width": common["stroke-width"],
+            "pointer-events": "none"
+          }));
+          shape = group;
+        } else if (kind === "document") {
+          const fold = Math.min(20, w * 0.18, h * 0.34);
+          const group = svgEl("g");
+          group.appendChild(svgEl("polygon", { ...common, points: `0,0 ${w - fold},0 ${w},${fold} ${w},${h} 0,${h}` }));
+          group.appendChild(svgEl("path", {
+            d: `M ${w - fold} 0 V ${fold} H ${w}`,
+            fill: "none",
+            stroke: common.stroke,
+            "stroke-width": common["stroke-width"],
+            "pointer-events": "none"
+          }));
+          shape = group;
+        } else if (kind === "note") {
+          const fold = Math.min(20, w * 0.18, h * 0.34);
+          const group = svgEl("g");
+          group.appendChild(svgEl("polygon", { ...common, points: `0,0 ${w},0 ${w},${h - fold} ${w - fold},${h} 0,${h}` }));
+          group.appendChild(svgEl("path", {
+            d: `M ${w} ${h - fold} H ${w - fold} V ${h}`,
+            fill: "none",
+            stroke: common.stroke,
+            "stroke-width": common["stroke-width"],
+            "pointer-events": "none"
+          }));
+          shape = group;
+        } else if (kind === "cloud") {
           shape = svgEl("path", { ...common, d: cloudPath(box.width, box.height) });
-        } else if (node.style && node.style.shape === "bubble") {
+        } else if (kind === "bubble") {
           shape = svgEl("path", { ...common, d: `M ${visual.radius} 0 H ${box.width - visual.radius} Q ${box.width} 0 ${box.width} ${visual.radius} V ${box.height - visual.radius - 8} Q ${box.width} ${box.height - 8} ${box.width - visual.radius} ${box.height - 8} H ${box.width * 0.58} L ${box.width * 0.48} ${box.height} L ${box.width * 0.50} ${box.height - 8} H ${visual.radius} Q 0 ${box.height - 8} 0 ${box.height - visual.radius - 8} V ${visual.radius} Q 0 0 ${visual.radius} 0 Z` });
+        } else if (kind === "heading") {
+          const group = svgEl("g");
+          group.appendChild(svgEl("rect", { ...common, x: 0, y: 0, width: w, height: h, rx: 3, ry: 3 }));
+          group.appendChild(svgEl("path", {
+            d: `M ${visual.padding} ${h - 8} L ${w - visual.padding} ${h - 8}`,
+            fill: "none",
+            stroke: selected || searchHit ? common.stroke : visual.border,
+            "stroke-width": Math.max(1.6, visual.borderWidth),
+            "pointer-events": "none"
+          }));
+          shape = group;
+        } else if (kind === "text") {
+          shape = svgEl("rect", { ...common, x: 0, y: 0, width: w, height: h, rx: 3, ry: 3 });
         } else {
-          const radius = node.style && node.style.shape === "rect" ? 2 : node.style && node.style.shape === "pill" ? box.height / 2 : visual.radius;
+          const radius = kind === "rect" || kind === "square" ? 2 : kind === "pill" ? box.height / 2 : visual.radius;
           shape = svgEl("rect", { ...common, x: 0, y: 0, width: box.width, height: box.height, rx: radius, ry: radius });
         }
         shape.removeAttribute("filter");
-        if (!state.isExporting) {
+        if (!state.isExporting && !transparentShape) {
           shape.style.filter = `drop-shadow(${shadowToDropShadow(getTheme().shadow)})`;
         }
-        if (node.style && node.style.shape === "card") {
+        if (kind === "card") {
           shape.setAttribute("rx", 7);
           const strip = svgEl("rect", {
             x: 0,
@@ -3177,7 +3577,7 @@ Deep Learning -> usa -> Redes neuronales`;
         });
         if (visual.dash === "dashed") path.setAttribute("stroke-dasharray", "10 8");
         if (visual.dash === "dotted") path.setAttribute("stroke-dasharray", "2 8");
-        if (edge.directed !== false) path.setAttribute("marker-end", selected ? "url(#arrow-accent)" : "url(#arrow)");
+        if (state.settings.connectionArrows !== false && edge.directed !== false) path.setAttribute("marker-end", selected ? "url(#arrow-accent)" : "url(#arrow)");
 
         group.appendChild(hit);
         group.appendChild(path);
@@ -3211,7 +3611,7 @@ Deep Learning -> usa -> Redes neuronales`;
           width,
           height: 26,
           rx: 13,
-          fill: getTheme().background,
+          fill: canvasSurfaceColor(),
           stroke: colorWithAlpha(edgeVisual(edge).color, 0.35),
           "stroke-width": 1
         }));
@@ -3396,6 +3796,11 @@ Deep Learning -> usa -> Redes neuronales`;
         if (edgeId) dom.visualRelationLabel.value = "";
       }
 
+      function toggleMoreShapes() {
+        state.visualMoreShapes = !state.visualMoreShapes;
+        renderAll(false);
+      }
+
       function createVisualNode(text, mode, referenceId, offsetIndex = 0) {
         const reference = getNode(referenceId);
         const hierarchy = hierarchyMaps(state.nodes, state.edges);
@@ -3416,7 +3821,7 @@ Deep Learning -> usa -> Redes neuronales`;
           children: [],
           sourceLine: null,
           kind: "visual",
-          style: {},
+          style: { shape: state.visualShape || "rounded" },
           x: point.x,
           y: point.y
         };
@@ -4153,7 +4558,7 @@ Deep Learning -> usa -> Redes neuronales`;
             canvas.width = Math.round(width * scale);
             canvas.height = Math.round(height * scale);
             const ctx = canvas.getContext("2d");
-            ctx.fillStyle = getTheme().background;
+            ctx.fillStyle = canvasSurfaceColor();
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.setTransform(scale, 0, 0, scale, 0, 0);
             ctx.drawImage(image, 0, 0, width, height);
@@ -4182,7 +4587,7 @@ Deep Learning -> usa -> Redes neuronales`;
         const pageHeight = Math.max(1, pdfNum(bounds.height * scale));
         const commands = [];
 
-        commands.push(pdfFill(getTheme().background));
+        commands.push(pdfFill(canvasSurfaceColor()));
         commands.push(pdfRectPath(bounds.minX, bounds.minY, bounds.width, bounds.height, bounds, scale, pageHeight));
         commands.push("f");
 
@@ -4213,7 +4618,7 @@ Deep Learning -> usa -> Redes neuronales`;
         commands.push("S");
         commands.push("Q");
 
-        if (edge.directed !== false) {
+        if (state.settings.connectionArrows !== false && edge.directed !== false) {
           const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
           const length = 12 + visual.width * 1.8;
           const width = 7 + visual.width;
@@ -4237,7 +4642,7 @@ Deep Learning -> usa -> Redes neuronales`;
           const label = String(edge.label).slice(0, 44);
           const labelWidth = Math.max(44, label.length * 7 + 18);
           const labelHeight = 26;
-          commands.push(pdfFill(getTheme().background));
+          commands.push(pdfFill(canvasSurfaceColor()));
           commands.push(pdfStroke(colorWithAlpha(visual.color, 0.45)));
           commands.push("1 w");
           commands.push(pdfRoundedRectPath(midpoint.x - labelWidth / 2, midpoint.y - labelHeight / 2, labelWidth, labelHeight, 13, bounds, scale, pageHeight));
@@ -4254,38 +4659,84 @@ Deep Learning -> usa -> Redes neuronales`;
         const shape = node.style && node.style.shape ? node.style.shape : "rounded";
 
         commands.push("q");
-        commands.push(pdfFill(visual.fill));
-        commands.push(pdfStroke(visual.border));
-        commands.push(`${pdfNum(Math.max(0.6, visual.borderWidth * scale))} w`);
+        if (shape !== "text" && shape !== "heading") {
+          commands.push(pdfFill(visual.fill));
+          commands.push(pdfStroke(visual.border));
+          commands.push(`${pdfNum(Math.max(0.6, visual.borderWidth * scale))} w`);
 
-        if (shape === "circle" || shape === "oval") {
-          commands.push(pdfEllipsePath(node.x, node.y, box.width / 2, box.height / 2, bounds, scale, pageHeight));
-        } else if (shape === "diamond") {
-          commands.push(pdfPolygonPath([
-            [node.x, y],
-            [x + box.width, node.y],
-            [node.x, y + box.height],
-            [x, node.y]
-          ], bounds, scale, pageHeight));
-        } else if (shape === "hex") {
-          commands.push(pdfPolygonPath([
-            [x + box.width * 0.14, y],
-            [x + box.width * 0.86, y],
-            [x + box.width, node.y],
-            [x + box.width * 0.86, y + box.height],
-            [x + box.width * 0.14, y + box.height],
-            [x, node.y]
-          ], bounds, scale, pageHeight));
-        } else {
-          const radius = shape === "rect" ? 2 : shape === "pill" ? box.height / 2 : visual.radius;
-          commands.push(pdfRoundedRectPath(x, y, box.width, box.height, radius, bounds, scale, pageHeight));
+          if (shape === "circle" || shape === "oval") {
+            commands.push(pdfEllipsePath(node.x, node.y, box.width / 2, box.height / 2, bounds, scale, pageHeight));
+          } else if (shape === "diamond") {
+            commands.push(pdfPolygonPath([
+              [node.x, y],
+              [x + box.width, node.y],
+              [node.x, y + box.height],
+              [x, node.y]
+            ], bounds, scale, pageHeight));
+          } else if (shape === "hex") {
+            commands.push(pdfPolygonPath([
+              [x + box.width * 0.14, y],
+              [x + box.width * 0.86, y],
+              [x + box.width, node.y],
+              [x + box.width * 0.86, y + box.height],
+              [x + box.width * 0.14, y + box.height],
+              [x, node.y]
+            ], bounds, scale, pageHeight));
+          } else if (shape === "triangle") {
+            commands.push(pdfPolygonPath([
+              [node.x, y],
+              [x + box.width, y + box.height],
+              [x, y + box.height]
+            ], bounds, scale, pageHeight));
+          } else if (shape === "parallelogram") {
+            commands.push(pdfPolygonPath([
+              [x + box.width * 0.16, y],
+              [x + box.width, y],
+              [x + box.width * 0.84, y + box.height],
+              [x, y + box.height]
+            ], bounds, scale, pageHeight));
+          } else if (shape === "document") {
+            const fold = Math.min(20, box.width * 0.18, box.height * 0.34);
+            commands.push(pdfPolygonPath([
+              [x, y],
+              [x + box.width - fold, y],
+              [x + box.width, y + fold],
+              [x + box.width, y + box.height],
+              [x, y + box.height]
+            ], bounds, scale, pageHeight));
+          } else if (shape === "note") {
+            const fold = Math.min(20, box.width * 0.18, box.height * 0.34);
+            commands.push(pdfPolygonPath([
+              [x, y],
+              [x + box.width, y],
+              [x + box.width, y + box.height - fold],
+              [x + box.width - fold, y + box.height],
+              [x, y + box.height]
+            ], bounds, scale, pageHeight));
+          } else {
+            const radius = shape === "rect" || shape === "square" ? 2 : shape === "pill" ? box.height / 2 : visual.radius;
+            commands.push(pdfRoundedRectPath(x, y, box.width, box.height, radius, bounds, scale, pageHeight));
+          }
+          commands.push("B");
+
+          if (shape === "cylinder") {
+            commands.push(pdfStroke(visual.border));
+            commands.push(pdfEllipsePath(node.x, y + Math.min(18, box.height * 0.24), box.width / 2, Math.min(12, box.height * 0.16), bounds, scale, pageHeight));
+            commands.push("S");
+          }
+          if (shape === "card") {
+            commands.push(pdfFill(getTheme().accentColor));
+            commands.push(pdfRoundedRectPath(x, y, 7, box.height, 4, bounds, scale, pageHeight));
+            commands.push("f");
+          }
         }
-        commands.push("B");
-
-        if (shape === "card") {
-          commands.push(pdfFill(getTheme().accentColor));
-          commands.push(pdfRoundedRectPath(x, y, 7, box.height, 4, bounds, scale, pageHeight));
-          commands.push("f");
+        if (shape === "heading") {
+          const p1 = pdfPoint(x + visual.padding, y + box.height - 8, bounds, scale, pageHeight);
+          const p2 = pdfPoint(x + box.width - visual.padding, y + box.height - 8, bounds, scale, pageHeight);
+          commands.push(pdfStroke(visual.border));
+          commands.push(`${pdfNum(Math.max(1, visual.borderWidth * scale))} w`);
+          commands.push(`${p1.x} ${p1.y} m ${p2.x} ${p2.y} l`);
+          commands.push("S");
         }
         commands.push("Q");
 
@@ -4395,7 +4846,7 @@ Deep Learning -> usa -> Redes neuronales`;
             y: 0,
             width: bounds.width,
             height: bounds.height,
-            fill: getTheme().background
+            fill: canvasSurfaceColor()
           }));
 
           const world = svgEl("g", { transform: `translate(${-bounds.minX} ${-bounds.minY})` });
@@ -4831,14 +5282,17 @@ Deep Learning -> usa -> Redes neuronales`;
 
       function nodeBox(node) {
         const visual = nodeVisual(node);
+        const shape = node.style && node.style.shape ? node.style.shape : "rounded";
         const baseWidth = node.style.width || clamp(node.text.length * visual.fontSize * 0.62 + visual.padding * 2 + 14, 118, 270);
-        const width = node.style.shape === "circle" ? Math.max(baseWidth, 96) : baseWidth;
+        const squareLike = shape === "circle" || shape === "square";
+        const width = squareLike ? Math.max(baseWidth, 96) : baseWidth;
         const maxChars = Math.max(8, Math.floor((width - visual.padding * 2) / (visual.fontSize * 0.58)));
         const lines = wrapText(node.text, maxChars);
         const lineHeight = Math.round(visual.fontSize * 1.35);
-        const height = node.style.height || clamp(lines.length * lineHeight + visual.padding * 2, node.style.shape === "circle" ? width : 48, 178);
-        const finalWidth = node.style.shape === "circle" ? Math.max(width, height) : width;
-        const finalHeight = node.style.shape === "circle" ? finalWidth : height;
+        const minHeight = squareLike ? width : ["cylinder", "document", "note", "triangle"].includes(shape) ? 64 : 48;
+        const height = node.style.height || clamp(lines.length * lineHeight + visual.padding * 2, minHeight, 178);
+        const finalWidth = squareLike ? Math.max(width, height) : width;
+        const finalHeight = squareLike ? finalWidth : height;
         return { width: finalWidth, height: finalHeight, lines, lineHeight };
       }
 
@@ -4995,6 +5449,20 @@ Deep Learning -> usa -> Redes neuronales`;
 
       function getTheme() {
         return THEMES[state.themeId] || THEMES.modernLight;
+      }
+
+      function canvasSurfaceColor() {
+        if (state.settings.backgroundEnabled && state.settings.pageView === false) {
+          return normalizeColorToHex(state.settings.backgroundColor || "#ffffff");
+        }
+        return getTheme().background;
+      }
+
+      function pageFillColor() {
+        if (state.settings.backgroundEnabled) {
+          return normalizeColorToHex(state.settings.backgroundColor || "#ffffff");
+        }
+        return getTheme().background;
       }
 
       function colorWithAlpha(hex, alpha) {
