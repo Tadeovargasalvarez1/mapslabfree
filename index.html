@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-ui="dark">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,50 +7,77 @@
   <title>MapLab - Markdown a mapas visuales</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <style>
     :root {
       color-scheme: light;
-      --app-bg: #f6f7fb;
-      --panel-bg: rgba(255, 255, 255, 0.92);
-      --panel-strong: #ffffff;
-      --panel-soft: #f0f3f8;
-      --border: #d8dee9;
-      --text: #172033;
-      --muted: #657083;
-      --muted-2: #8792a4;
-      --accent: #2f80ed;
-      --accent-2: #12b886;
-      --danger: #e5484d;
-      --warning: #f59f00;
-      --canvas-bg: #fbfcff;
-      --canvas-grid: rgba(77, 91, 124, 0.12);
-      --shadow: 0 18px 52px rgba(31, 41, 55, 0.12);
+      /* AuthKit light-frost variant */
+      --app-bg: #eef1f8;
+      --panel-bg: rgba(255, 255, 255, 0.72);
+      --panel-strong: rgba(255, 255, 255, 0.86);
+      --panel-soft: rgba(203, 214, 234, 0.5);
+      --border: rgba(47, 52, 62, 0.14);
+      --text: #12172a;
+      --muted: #454f63;
+      --muted-2: #6b7688;
+      --accent: #663af3;
+      --accent-2: #269684;
+      --danger: #d14727;
+      --warning: #b5842a;
+      --canvas-bg: #ffffff;
+      --canvas-grid: rgba(63, 73, 89, 0.10);
+      --shadow: 0 24px 48px rgba(63, 73, 89, 0.16);
       --toolbar-h: 58px;
       --left-w: 370px;
       --right-w: 326px;
-      --radius: 8px;
+      --radius: 16px;
       --font-ui: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-display: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
+      --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      /* AuthKit tokens */
+      --color-midnight-canvas: #05060f;
+      --color-frost-glow: #d1e4fa;
+      --color-void-violet: #663af3;
+      --gradient-skywash: linear-gradient(0deg, #d8ecf8 0%, #98c0ef 100%);
+      --glass-edge: inset 0 0 0 1px rgba(47, 52, 62, 0.14);
+      --glass-fill: rgba(186, 214, 247, 0.06);
+      --glass-fill-hover: rgba(186, 214, 247, 0.12);
+      --shadow-frost: 0 0 6px rgba(186, 207, 247, 0.32), 0 0 12px rgba(238, 186, 247, 0.24);
+      --shadow-card: inset 0 1px 1px rgba(199, 211, 234, 0.12), inset 0 24px 48px rgba(199, 211, 234, 0.05), 0 24px 32px rgba(6, 6, 14, 0.5);
+      --page-grid: rgba(63, 73, 89, 0.06);
+      --page-glow: rgba(124, 145, 182, 0.16);
+      --map-accent: #663af3;
+      --map-accent-2: #269684;
     }
 
     :root[data-ui="dark"] {
       color-scheme: dark;
-      --app-bg: #111318;
-      --panel-bg: rgba(26, 29, 36, 0.94);
-      --panel-strong: #1f232d;
-      --panel-soft: #171a21;
-      --border: #333947;
-      --text: #ecf1f8;
-      --muted: #a7b0c0;
-      --muted-2: #768196;
-      --accent: #7aa8ff;
-      --accent-2: #42d392;
-      --danger: #ff6b6b;
-      --warning: #ffd166;
-      --canvas-bg: #10131a;
-      --canvas-grid: rgba(184, 196, 218, 0.12);
-      --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+      /* AuthKit — Frosteed glass cathedral at midnight */
+      --app-bg: #05060f;
+      --panel-bg: rgba(5, 6, 15, 0.72);
+      --panel-strong: rgba(186, 214, 247, 0.04);
+      --panel-soft: rgba(186, 214, 247, 0.07);
+      --border: rgba(186, 215, 247, 0.12);
+      --text: #d1e4fa;
+      --muted: #c7d3ea;
+      --muted-2: #9da7ba;
+      --accent: #663af3;
+      --accent-2: #269684;
+      --danger: #e46d4c;
+      --warning: #b6d9fc;
+      --canvas-bg: #05060f;
+      --canvas-grid: rgba(186, 215, 247, 0.07);
+      --shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+      --glass-edge: inset 0 0 0 1px rgba(186, 215, 247, 0.12);
+      --glass-fill: rgba(186, 214, 247, 0.06);
+      --glass-fill-hover: rgba(186, 214, 247, 0.12);
+      --shadow-frost: 0 0 6px rgba(186, 207, 247, 0.32), 0 0 12px rgba(238, 186, 247, 0.24);
+      --shadow-card: inset 0 1px 1px rgba(216, 236, 248, 0.2), inset 0 24px 48px rgba(168, 216, 245, 0.06), 0 16px 32px rgba(0, 0, 0, 0.3);
+      --page-grid: rgba(186, 215, 247, 0.055);
+      --page-glow: rgba(124, 145, 182, 0.28);
+      --map-accent: #663af3;
+      --map-accent-2: #269684;
     }
 
     * {
@@ -65,13 +92,39 @@
     body {
       margin: 0;
       overflow: hidden;
-      background:
-        linear-gradient(135deg, rgba(18, 184, 134, 0.08), transparent 28%),
-        linear-gradient(315deg, rgba(239, 100, 97, 0.08), transparent 26%),
-        var(--app-bg);
+      background: var(--app-bg);
       color: var(--text);
       font-family: var(--font-ui);
-      letter-spacing: 0;
+      letter-spacing: -0.01em;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(var(--page-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--page-grid) 1px, transparent 1px);
+      background-size: 88px 88px;
+      -webkit-mask-image: radial-gradient(ellipse 90% 75% at 50% 0%, #000 0%, transparent 78%);
+      mask-image: radial-gradient(ellipse 90% 75% at 50% 0%, #000 0%, transparent 78%);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      top: -220px;
+      left: 50%;
+      width: 900px;
+      height: 640px;
+      transform: translateX(-50%);
+      z-index: 0;
+      pointer-events: none;
+      background: conic-gradient(at 50% -5%, transparent 44%, var(--page-glow) 48%, var(--page-glow) 50%, rgba(124, 145, 182, 0.06) 52%, transparent 56%);
+      filter: blur(10px);
+      opacity: 0.9;
     }
 
     button,
@@ -1165,10 +1218,721 @@
       grid-template-rows: 1fr;
     }
 
+    /* ============================================================
+       AuthKit theme layer — frosted glass cathedral at midnight
+       ============================================================ */
+
+    .app-shell {
+      position: relative;
+      z-index: 1;
+    }
+
+    .topbar {
+      border-bottom: 1px solid var(--border);
+      background: var(--panel-bg);
+      backdrop-filter: blur(22px) saturate(140%);
+      -webkit-backdrop-filter: blur(22px) saturate(140%);
+      box-shadow: inset 0 -1px 0 rgba(186, 215, 247, 0.05);
+    }
+
+    .brand {
+      border: 0;
+      border-radius: 999px;
+      padding: 5px 14px 5px 5px;
+      background: var(--glass-fill);
+      box-shadow: var(--glass-edge), var(--shadow-frost);
+      backdrop-filter: blur(10px);
+    }
+
+    .brand-mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 9999px;
+      background: radial-gradient(circle at 32% 22%, #a68cff, var(--color-void-violet) 72%);
+      box-shadow: inset 0 1px 1px rgba(216, 236, 248, 0.35), 0 0 14px rgba(102, 58, 243, 0.5);
+      color: #ffffff;
+      font-weight: 500;
+      font-size: 15px;
+    }
+
+    .brand-name {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: 17px;
+      letter-spacing: 0;
+      background: var(--gradient-skywash);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .toolgroup {
+      border: 0;
+      border-radius: 999px;
+      padding: 4px;
+      background: var(--glass-fill);
+      box-shadow: var(--glass-edge);
+    }
+
+    .toolgroup.flat {
+      border-color: transparent;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .icon-btn,
+    .text-btn,
+    .chip-btn {
+      border: 0;
+      border-radius: 999px;
+      color: var(--text);
+      background: transparent;
+    }
+
+    .chip-btn {
+      background: var(--glass-fill);
+      box-shadow: var(--glass-edge);
+      color: var(--text);
+      font-weight: 500;
+      letter-spacing: 0;
+    }
+
+    .icon-btn:hover,
+    .text-btn:hover,
+    .chip-btn:hover {
+      background: var(--glass-fill-hover);
+    }
+
+    .icon-btn.active {
+      background: var(--glass-fill-hover);
+      color: var(--color-frost-glow);
+      box-shadow: var(--glass-edge);
+    }
+
+    .text-btn.active,
+    .chip-btn.active {
+      background: var(--color-void-violet);
+      color: #ffffff;
+      box-shadow: inset 0 0 0 1px rgba(186, 215, 247, 0.16), 0 8px 22px rgba(102, 58, 243, 0.36), 0 0 12px rgba(238, 186, 247, 0.24);
+    }
+
+    .icon-btn.danger:hover,
+    .text-btn.danger:hover {
+      background: rgba(228, 109, 76, 0.16);
+      color: var(--danger);
+    }
+
+    .select {
+      border: 0;
+      border-radius: 6px;
+      background: var(--glass-fill);
+      box-shadow: var(--glass-edge);
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .select option {
+      color: #0a0d18;
+      background: #ffffff;
+    }
+
+    .searchbox {
+      border: 0;
+      border-radius: 999px;
+      background: var(--glass-fill);
+      box-shadow: var(--glass-edge);
+    }
+
+    .searchbox input {
+      color: var(--text);
+    }
+
+    .searchbox input::placeholder {
+      color: var(--muted);
+    }
+
+    .panel {
+      border-color: var(--border);
+      background: var(--panel-bg);
+      backdrop-filter: blur(24px) saturate(130%);
+      -webkit-backdrop-filter: blur(24px) saturate(130%);
+    }
+
+    .panel-title,
+    .section-title {
+      font-family: var(--font-mono);
+      font-weight: 400;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .builder-hint {
+      margin: -2px 0 10px;
+      color: var(--muted-2);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .modal-title,
+    .empty-state h2 {
+      font-family: var(--font-display);
+      font-weight: 500;
+      letter-spacing: 0;
+      background: var(--gradient-skywash);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .canvas-toolbar {
+      border-bottom: 1px solid var(--border);
+      background: var(--panel-bg);
+      backdrop-filter: blur(20px) saturate(130%);
+      -webkit-backdrop-filter: blur(20px) saturate(130%);
+    }
+
+    .canvas-meta {
+      border: 0;
+      border-radius: 999px;
+      background: var(--glass-fill);
+      box-shadow: var(--glass-edge);
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-weight: 400;
+      letter-spacing: 0.02em;
+    }
+
+    .selection-box {
+      border: 1px solid var(--map-accent);
+      background: color-mix(in srgb, var(--map-accent) 12%, transparent);
+    }
+
+    .mini-toolbar,
+    .context-menu,
+    .modal-card,
+    .toast,
+    .palette-popover {
+      border: 0;
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--app-bg) 94%, transparent);
+      box-shadow: var(--shadow-card);
+      backdrop-filter: blur(24px) saturate(130%);
+      -webkit-backdrop-filter: blur(24px) saturate(130%);
+    }
+
+    .menu-item {
+      border-radius: 10px;
+      font-weight: 500;
+    }
+
+    .menu-item:hover {
+      background: var(--glass-fill-hover);
+    }
+
+    .divider {
+      background: var(--border);
+    }
+
+    .field input,
+    .field textarea,
+    .field select {
+      border: 0;
+      border-radius: 6px;
+      background: var(--glass-fill);
+      box-shadow: var(--glass-edge);
+      color: var(--text);
+    }
+
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus {
+      box-shadow: inset 0 0 0 1px rgba(186, 215, 247, 0.28), 0 0 0 3px rgba(102, 58, 243, 0.18);
+    }
+
+    .field input::placeholder,
+    .field textarea::placeholder {
+      color: var(--muted-2);
+    }
+
+    .field select option {
+      color: #0a0d18;
+      background: #ffffff;
+    }
+
+    .swatch {
+      border-radius: 6px;
+      box-shadow: var(--glass-edge);
+    }
+
+    .swatch.active {
+      outline: 2px solid var(--color-void-violet);
+    }
+
+    .segmented {
+      border: 0;
+      border-radius: 999px;
+      background: var(--glass-fill);
+      box-shadow: var(--glass-edge);
+    }
+
+    .segmented button {
+      border-radius: 999px;
+    }
+
+    .segmented button.active {
+      background: var(--glass-fill-hover);
+      color: var(--text);
+      box-shadow: var(--glass-edge);
+    }
+
+    .mode-tabs {
+      background: transparent;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .mode-tabs button {
+      border-radius: 999px;
+      font-weight: 500;
+    }
+
+    .shape-option {
+      border: 0;
+      border-radius: 12px;
+      background: var(--glass-fill);
+      box-shadow: var(--glass-edge);
+      color: var(--muted);
+      cursor: grab;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .shape-option:active {
+      cursor: grabbing;
+    }
+
+    .shape-option:hover,
+    .shape-option.active {
+      background: color-mix(in srgb, var(--color-void-violet) 22%, transparent);
+      box-shadow: inset 0 0 0 1px rgba(186, 215, 247, 0.24);
+      color: var(--color-frost-glow);
+    }
+
+    /* Drag & drop shapes onto the board */
+    body.dragging-shape {
+      cursor: grabbing;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .drag-ghost {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 80;
+      display: grid;
+      place-items: center;
+      width: 64px;
+      height: 52px;
+      border-radius: 12px;
+      color: var(--color-frost-glow);
+      background: color-mix(in srgb, var(--color-void-violet) 24%, rgba(5, 6, 15, 0.72));
+      box-shadow: inset 0 0 0 1px rgba(186, 215, 247, 0.32), 0 18px 40px rgba(0, 0, 0, 0.5), 0 0 22px rgba(102, 58, 243, 0.45);
+      backdrop-filter: blur(10px);
+      pointer-events: none;
+      opacity: 0.92;
+      will-change: transform;
+    }
+
+    .drag-ghost .shape-preview {
+      width: 34px;
+      height: 24px;
+    }
+
+    .canvas-shell.drop-active {
+      box-shadow: inset 0 0 0 2px var(--color-void-violet), inset 0 0 60px rgba(102, 58, 243, 0.18);
+    }
+
+    .canvas-shell.drop-active::after {
+      content: "Suelta para agregar";
+      position: absolute;
+      inset: auto auto 18px 50%;
+      transform: translateX(-50%);
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--color-void-violet) 32%, rgba(5, 6, 15, 0.7));
+      box-shadow: inset 0 0 0 1px rgba(186, 215, 247, 0.32);
+      color: #ffffff;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .check-option {
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .editor-wrap {
+      background: transparent;
+    }
+
+    .line-numbers {
+      border-right: 1px solid var(--border);
+      background: transparent;
+      font-family: var(--font-mono);
+    }
+
+    .markdown-editor {
+      font-family: var(--font-mono);
+    }
+
+    .editor-footer {
+      border-top: 1px solid var(--border);
+    }
+
+    .status-dot::before {
+      background: var(--accent-2);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-2) 16%, transparent), 0 0 10px var(--accent-2);
+    }
+
+    .empty-state {
+      border: 0;
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--app-bg) 92%, transparent);
+      box-shadow: var(--shadow-card);
+    }
+
+    .empty-state h2 {
+      font-size: 24px;
+    }
+
+    .project-card,
+    .export-option {
+      border: 0;
+      border-radius: 16px;
+      background: var(--glass-fill);
+      box-shadow: var(--glass-edge);
+      font-weight: 500;
+    }
+
+    .project-card:hover,
+    .export-option:hover {
+      background: var(--glass-fill-hover);
+      box-shadow: inset 0 0 0 1px rgba(102, 58, 243, 0.45), var(--shadow-frost);
+    }
+
+    .export-option svg {
+      color: var(--color-frost-glow);
+    }
+
+    .project-preview {
+      border: 0;
+      border-radius: 10px;
+      background:
+        radial-gradient(120% 90% at 20% 0%, rgba(102, 58, 243, 0.35), transparent 60%),
+        radial-gradient(120% 90% at 90% 100%, rgba(2, 125, 234, 0.28), transparent 60%),
+        var(--color-midnight-canvas);
+      box-shadow: var(--glass-edge);
+    }
+
+    .modal-backdrop {
+      background: rgba(5, 6, 15, 0.62);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    .modal-head,
+    .modal-foot {
+      border-color: var(--border);
+    }
+
+    .modal-title {
+      font-size: 22px;
+    }
+
+    .toast {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .outline-item {
+      border-radius: 10px;
+      font-weight: 500;
+    }
+
+    .outline-item:hover,
+    .outline-item.active {
+      background: var(--glass-fill-hover);
+    }
+
+    /* ============================================================
+       Motion — fluid micro-interactions for icons & controls
+       ============================================================ */
+
+    .icon-btn,
+    .text-btn,
+    .chip-btn,
+    .brand,
+    .toolgroup,
+    .select,
+    .searchbox,
+    .segmented button,
+    .mode-tabs button,
+    .shape-option,
+    .swatch,
+    .menu-item,
+    .outline-item,
+    .export-option,
+    .project-card,
+    .check-option,
+    .canvas-meta,
+    .field input,
+    .field textarea,
+    .field select {
+      transition:
+        background 240ms cubic-bezier(0.22, 0.61, 0.36, 1),
+        background-color 240ms cubic-bezier(0.22, 0.61, 0.36, 1),
+        color 180ms ease,
+        box-shadow 280ms cubic-bezier(0.22, 0.61, 0.36, 1),
+        border-color 220ms ease,
+        transform 240ms cubic-bezier(0.22, 0.61, 0.36, 1),
+        opacity 200ms ease,
+        filter 240ms ease;
+    }
+
+    .icon-btn svg,
+    .text-btn svg,
+    .chip-btn svg,
+    .menu-item svg,
+    .export-option svg,
+    .section-title svg,
+    .brand-mark {
+      transition: transform 280ms cubic-bezier(0.34, 1.4, 0.64, 1), color 200ms ease, opacity 200ms ease;
+    }
+
+    .icon-btn:hover svg,
+    .text-btn:hover svg,
+    .chip-btn:hover svg,
+    .menu-item:hover svg,
+    .export-option:hover svg,
+    .section-title:hover svg {
+      transform: translateY(-1px) scale(1.14);
+    }
+
+    .icon-btn:active svg,
+    .text-btn:active svg,
+    .chip-btn:active svg {
+      transform: scale(0.88);
+      transition-duration: 90ms;
+    }
+
+    .icon-btn:hover,
+    .text-btn:hover,
+    .chip-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .text-btn.active:hover,
+    .chip-btn.active:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.1);
+    }
+
+    .icon-btn:active,
+    .text-btn:active,
+    .chip-btn:active {
+      transform: translateY(1px) scale(0.96);
+    }
+
+    .brand:hover {
+      transform: translateY(-1px);
+      background: var(--glass-fill-hover);
+    }
+
+    .brand:hover .brand-mark {
+      transform: rotate(-10deg) scale(1.08);
+    }
+
+    .shape-option:hover,
+    .menu-item:hover,
+    .outline-item:hover {
+      transform: translateX(2px);
+    }
+
+    .shape-option:hover {
+      transform: translateY(-2px);
+    }
+
+    .shape-option:active {
+      transform: scale(0.92);
+      transition-duration: 90ms;
+    }
+
+    .segmented button:active,
+    .mode-tabs button:active {
+      transform: scale(0.95);
+      transition-duration: 90ms;
+    }
+
+    .swatch:hover {
+      transform: translateY(-3px) scale(1.08);
+      box-shadow: var(--glass-edge), 0 8px 18px rgba(0, 0, 0, 0.35);
+    }
+
+    .swatch:active {
+      transform: scale(0.9);
+      transition-duration: 90ms;
+    }
+
+    .export-option:hover,
+    .project-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .export-option:active,
+    .project-card:active {
+      transform: translateY(-1px) scale(0.985);
+    }
+
+    .export-option:hover svg {
+      transform: translateY(-3px) scale(1.16);
+    }
+
+    .toolgroup .icon-btn.active {
+      animation: softPop 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .mode-tabs button.active,
+    .segmented button.active {
+      animation: softPop 280ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .status-dot::before {
+      animation: pulseDot 2200ms ease-in-out infinite;
+    }
+
+    /* Entrances */
+    .topbar {
+      animation: dropIn 460ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+    }
+
+    .left-panel {
+      animation: slideInLeft 520ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+    }
+
+    .right-panel {
+      animation: slideInRight 520ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+    }
+
+    .canvas-area {
+      animation: fadeIn 560ms ease both;
+    }
+
+    .modal-backdrop.visible .modal-card {
+      animation: modalPop 400ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+    }
+
+    .mini-toolbar.visible {
+      animation: popIn 240ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    .context-menu.visible {
+      animation: menuIn 200ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+    }
+
+    .toast.visible {
+      animation: toastIn 340ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+    }
+
+    .empty-state.visible {
+      animation: fadeUpCenter 460ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+    }
+
+    @keyframes softPop {
+      0% { transform: scale(0.9); }
+      55% { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.55; transform: scale(0.82); }
+    }
+
+    @keyframes dropIn {
+      from { opacity: 0; transform: translateY(-12px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-18px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(18px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes modalPop {
+      from { opacity: 0; transform: translateY(16px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: translateY(8px) scale(0.9); }
+      to { opacity: 1; transform: none; }
+    }
+
+    @keyframes menuIn {
+      from { opacity: 0; transform: translateY(8px) scale(0.97); }
+      to { opacity: 1; transform: none; }
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(18px) scale(0.97); }
+      to { opacity: 1; transform: none; }
+    }
+
+    @keyframes fadeUpCenter {
+      from { opacity: 0; transform: translate(-50%, calc(-50% + 16px)); }
+      to { opacity: 1; transform: translate(-50%, -50%); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
+
+      .status-dot::before {
+        animation: none;
+      }
+    }
+
+    :root[data-animations="off"] *,
+    :root[data-animations="off"] *::before,
+    :root[data-animations="off"] *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+
     :focus-visible {
-      outline: 2px solid var(--accent);
+      outline: 2px solid var(--color-void-violet);
       outline-offset: 2px;
     }
+
 
     @media (max-width: 1180px) {
       :root {
@@ -1310,6 +2074,7 @@
             <div class="builder-scroll">
               <div class="builder-section">
                 <div class="section-title"><i data-lucide="shapes"></i><span>Formas</span></div>
+                <p class="builder-hint">Arrastra una forma y sueltala sobre la pizarra.</p>
                 <div class="shape-palette" id="visualShapePalette" aria-label="Paleta de formas"></div>
                 <button class="chip-btn full" data-action="toggle-more-shapes" style="margin-top: 10px;"><i data-lucide="plus"></i>Mas formas</button>
               </div>
@@ -1420,8 +2185,8 @@
           <svg id="mapSvg" tabindex="0" role="application" aria-label="Mapa visual"></svg>
 
           <div class="empty-state" id="emptyState">
-            <h2>Agrega nodos para crear tu mapa</h2>
-            <p>Construye ideas, ramas y conexiones desde el panel de Nodos.</p>
+            <h2>Arrastra una forma a la pizarra</h2>
+            <p>Tu pizarra empieza vacia. Arrastra una forma desde el panel de Formas hasta aqui, o crea nodos desde el constructor.</p>
             <button class="text-btn active" data-action="visual-focus-input"><i data-lucide="circle-plus"></i>Agregar nodo</button>
             <button class="text-btn active" data-action="load-example"><i data-lucide="sparkles"></i>Crear ejemplo</button>
             <button class="text-btn" data-action="import"><i data-lucide="folder-open"></i>Importar Markdown</button>
@@ -1814,15 +2579,15 @@ Deep Learning -> usa -> Redes neuronales`;
         },
         modernDark: {
           name: "Modern Dark",
-          background: "#111318",
-          grid: "rgba(184, 196, 218, 0.12)",
-          nodeColors: ["#202631", "#27364a", "#203d35", "#40372b", "#3d2833"],
-          textColor: "#eef3fb",
-          edgeColor: "#68758a",
-          accentColor: "#7aa8ff",
+          background: "#05060f",
+          grid: "rgba(186, 215, 247, 0.07)",
+          nodeColors: ["#0e1426", "#141a30", "#12203c", "#1a1432", "#0f2430"],
+          textColor: "#d1e4fa",
+          edgeColor: "#5b6f95",
+          accentColor: "#663af3",
           font: "Inter, ui-sans-serif, system-ui",
           nodeRadius: 14,
-          shadow: "0 18px 42px rgba(0, 0, 0, 0.35)"
+          shadow: "0 18px 42px rgba(0, 0, 0, 0.45)"
         },
         pastel: {
           name: "Pastel",
@@ -2039,7 +2804,7 @@ Deep Learning -> usa -> Redes neuronales`;
         selectedIds: [],
         selectedEdgeId: null,
         mapType: "radial",
-        themeId: "modernLight",
+        themeId: "modernDark",
         paletteId: "professional",
         colorByDepth: true,
         viewport: { x: 520, y: 330, zoom: 1 },
@@ -2058,7 +2823,7 @@ Deep Learning -> usa -> Redes neuronales`;
           animations: true,
           debounce: 380,
           spacing: "normal",
-          uiMode: "auto",
+          uiMode: "dark",
           contentMode: "visual"
         },
         past: [],
@@ -2088,15 +2853,31 @@ Deep Learning -> usa -> Redes neuronales`;
       function init() {
         cacheDom();
         populateStaticControls();
+        startEmptyDocument();
         applyUiMode();
         dom.editor.value = state.markdown;
         updateLineNumbers();
-        if (!state.nodes.length) {
-          syncMarkdown(state.markdown, { preserve: true, layoutMissing: true });
-        }
         bindEvents();
         renderAll();
         setTimeout(() => fitView(false), 90);
+      }
+
+      function startEmptyDocument() {
+        state.nodes = [];
+        state.edges = [];
+        state.markdown = EMPTY_MARKDOWN;
+        state.name = "Mapa sin titulo";
+        state.selectedIds = [];
+        state.selectedEdgeId = null;
+        state.past = [];
+        state.future = [];
+        state.viewport = { x: 520, y: 330, zoom: 1 };
+        state.dragShape = null;
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+        } catch (error) {
+          /* almacenamiento no disponible */
+        }
       }
 
       function cacheDom() {
@@ -2195,6 +2976,10 @@ Deep Learning -> usa -> Redes neuronales`;
         dom.visualShapePalette.addEventListener("click", (event) => {
           const button = event.target.closest("[data-shape-pick]");
           if (!button) return;
+          if (state.suppressShapeClick) {
+            state.suppressShapeClick = false;
+            return;
+          }
           state.visualShape = button.dataset.shapePick;
           if (state.selectedIds.length) {
             mutate(() => {
@@ -2209,6 +2994,12 @@ Deep Learning -> usa -> Redes neuronales`;
             renderAll(false);
           }
           dom.visualNodeText.focus({ preventScroll: true });
+        });
+
+        dom.visualShapePalette.addEventListener("pointerdown", (event) => {
+          const button = event.target.closest("[data-shape-pick]");
+          if (!button) return;
+          beginShapeDrag(event, button);
         });
 
         dom.visualNodeText.addEventListener("keydown", (event) => {
@@ -3070,8 +3861,8 @@ Deep Learning -> usa -> Redes neuronales`;
         const root = document.documentElement;
         root.style.setProperty("--canvas-bg", canvasSurfaceColor());
         root.style.setProperty("--canvas-grid", theme.grid);
-        root.style.setProperty("--accent", theme.accentColor);
-        root.style.setProperty("--accent-2", state.paletteId === "orange" ? "#f59f00" : "#12b886");
+        root.style.setProperty("--map-accent", theme.accentColor);
+        root.style.setProperty("--map-accent-2", state.paletteId === "orange" ? "#f59f00" : "#12b886");
         dom.canvasShell.classList.toggle("no-grid", !state.settings.grid);
         dom.canvasShell.style.backgroundSize = `${state.settings.gridSize}px ${state.settings.gridSize}px`;
       }
@@ -3141,6 +3932,7 @@ Deep Learning -> usa -> Redes neuronales`;
         $("#connectionPointsToggle").checked = state.settings.connectionPoints !== false;
         $("#guidesToggle").checked = state.settings.guides !== false;
         $("#animationsToggle").checked = state.settings.animations;
+        document.documentElement.dataset.animations = state.settings.animations === false ? "off" : "on";
       }
 
       function renderContentMode() {
@@ -3799,6 +4591,112 @@ Deep Learning -> usa -> Redes neuronales`;
       function toggleMoreShapes() {
         state.visualMoreShapes = !state.visualMoreShapes;
         renderAll(false);
+      }
+
+      function beginShapeDrag(event, button) {
+        if (event.button !== undefined && event.button !== 0) return;
+        if (event.pointerType === "mouse" && event.buttons !== 1) return;
+        state.dragShape = {
+          shape: button.dataset.shapePick,
+          startX: event.clientX,
+          startY: event.clientY,
+          moved: false,
+          ghost: null
+        };
+        window.addEventListener("pointermove", handleShapeDragMove);
+        window.addEventListener("pointerup", handleShapeDragEnd);
+        window.addEventListener("pointercancel", handleShapeDragEnd);
+      }
+
+      function handleShapeDragMove(event) {
+        const drag = state.dragShape;
+        if (!drag) return;
+        const dx = event.clientX - drag.startX;
+        const dy = event.clientY - drag.startY;
+        if (!drag.moved && Math.hypot(dx, dy) < 5) return;
+        if (!drag.moved) {
+          drag.moved = true;
+          document.body.classList.add("dragging-shape");
+          drag.ghost = createShapeGhost(drag.shape);
+          document.body.appendChild(drag.ghost);
+        }
+        event.preventDefault();
+        drag.ghost.style.transform = `translate(${event.clientX}px, ${event.clientY}px) translate(-50%, -50%)`;
+        dom.canvasShell.classList.toggle("drop-active", isPointOverCanvas(event.clientX, event.clientY));
+      }
+
+      function handleShapeDragEnd(event) {
+        window.removeEventListener("pointermove", handleShapeDragMove);
+        window.removeEventListener("pointerup", handleShapeDragEnd);
+        window.removeEventListener("pointercancel", handleShapeDragEnd);
+        const drag = state.dragShape;
+        state.dragShape = null;
+        if (!drag) return;
+        document.body.classList.remove("dragging-shape");
+        dom.canvasShell.classList.remove("drop-active");
+        if (drag.ghost) drag.ghost.remove();
+        if (!drag.moved) return;
+        state.suppressShapeClick = true;
+        setTimeout(() => { state.suppressShapeClick = false; }, 60);
+        if (!isPointOverCanvas(event.clientX, event.clientY)) return;
+        const world = clientToWorld(event.clientX, event.clientY);
+        const created = createShapeNodeAt(drag.shape, world.x, world.y);
+        if (created) toast(`Forma "${shapeLabel(drag.shape)}" agregada a la pizarra`);
+      }
+
+      function createShapeGhost(shape) {
+        const ghost = document.createElement("div");
+        ghost.className = "drag-ghost";
+        ghost.innerHTML = `<span class="shape-preview ${shape}"></span>`;
+        return ghost;
+      }
+
+      function isPointOverCanvas(clientX, clientY) {
+        const rect = dom.canvasShell.getBoundingClientRect();
+        return clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom;
+      }
+
+      function shapeLabel(shapeId) {
+        const match = SHAPES.find(([id]) => id === shapeId);
+        return match ? match[1] : shapeId;
+      }
+
+      function createShapeNodeAt(shape, x, y) {
+        const point = snapPoint({ x, y });
+        let created = null;
+        mutate(() => {
+          const title = uniqueTitle("Nuevo nodo");
+          const id = nextNodeId(title);
+          const node = {
+            id,
+            parentId: null,
+            text: title,
+            level: 1,
+            children: [],
+            sourceLine: null,
+            kind: "visual",
+            style: { shape },
+            x: point.x,
+            y: point.y
+          };
+          state.nodes.push(node);
+          state.selectedIds = [id];
+          state.selectedEdgeId = null;
+          state.visualShape = shape;
+          if (!state.name || state.name === "Mapa sin titulo") state.name = node.text;
+          refreshMarkdownFromGraph();
+          created = node;
+        }, "Agregar forma");
+        if (created) {
+          requestAnimationFrame(() => {
+            const field = $("#nodeText");
+            if (field) {
+              field.focus();
+              field.select();
+            }
+          });
+        }
+        return created;
       }
 
       function createVisualNode(text, mode, referenceId, offsetIndex = 0) {
